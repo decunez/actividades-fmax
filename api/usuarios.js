@@ -1,10 +1,12 @@
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
+  // Configuración de cabeceras CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+  // Responder a peticiones preflight (OPTIONS)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -19,13 +21,12 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-    const [rows] = await connection.execute('SELECT nombre FROM usuarios WHERE id = 1');
+    const [rows] = await connection.execute(
+      'SELECT id, nombre, telefono, direccion, sector FROM usuarios ORDER BY id ASC'
+    );
     await connection.end();
 
-    if (rows.length > 0) {
-      return res.status(200).json({ nombre: rows[0].nombre });
-    }
-    return res.status(404).json({ error: 'Usuario no encontrado' });
+    return res.status(200).json(rows);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
