@@ -4,221 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Actividades FMAX</title>
-  <!-- Fuente moderna Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-primary: #0f172a;
-      --bg-surface: #1e293b;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border: #334155;
-      --radius: 12px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Navegación */
-    .navbar {
-      background-color: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .brand span {
-      color: var(--accent);
-    }
-
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 1.5rem;
-    }
-
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 0.2s, background 0.2s;
-      padding: 0.5rem 0.8rem;
-      border-radius: 6px;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--text-main);
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    /* Menú hamburguesa móvil */
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--text-main);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    /* Layout principal */
-    .container {
-      max-width: 1100px;
-      width: 100%;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
-      flex: 1;
-    }
-
-    .header-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .btn-primary {
-      background-color: var(--accent);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: var(--radius);
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--accent-hover);
-    }
-
-    /* Grilla responsiva de tarjetas */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-    }
-
-    .card-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .card-desc {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 1rem;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.6rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border-radius: 20px;
-      text-transform: uppercase;
-      width: fit-content;
-    }
-
-    .badge-alta { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-    .badge-media { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-
-    footer {
-      text-align: center;
-      padding: 1.5rem;
-      color: var(--text-muted);
-      border-top: 1px solid var(--border);
-      font-size: 0.85rem;
-    }
-
-    /* Ajustes para dispositivos móviles */
-    @media (max-width: 768px) {
-      .menu-toggle {
-        display: block;
-      }
-
-      .nav-links {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background-color: var(--bg-surface);
-        border-bottom: 1px solid var(--border);
-        padding: 1rem;
-      }
-
-      .nav-links.active {
-        display: flex;
-      }
-    }
-  </style>
+  <!-- Enlace al CSS -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Barra de Navegación -->
   <nav class="navbar">
     <div class="brand">Actividades <span>FMAX</span></div>
     <button class="menu-toggle" id="menuToggle">☰</button>
     <ul class="nav-links" id="navLinks">
       <li><a href="index.html" class="active">Inicio</a></li>
+      <li><a href="usuarios.html">Usuarios</a></li>
       <li><a href="actividades.html">Actividades</a></li>
       <li><a href="reportes.html">Reportes</a></li>
       <li><a href="configuracion.html">Configuración</a></li>
     </ul>
   </nav>
 
-  <!-- Contenido Principal -->
   <main class="container">
     <section class="header-section">
       <div>
@@ -229,7 +32,6 @@
     </section>
 
     <div class="grid" id="contenedor-actividades">
-      <!-- Tarjeta 1 -->
       <article class="card">
         <div>
           <span class="badge badge-alta">Prioridad Alta</span>
@@ -239,7 +41,6 @@
         <small style="color: var(--text-muted);">Estado: En Proceso</small>
       </article>
 
-      <!-- Tarjeta 2 -->
       <article class="card">
         <div>
           <span class="badge badge-media">Prioridad Media</span>
@@ -255,14 +56,7 @@
     <p>&copy; 2026 Sistema FMAX - Todos los derechos reservados</p>
   </footer>
 
-  <script>
-    // Control del menú desplegable en móviles
-    const menuToggle = document.getElementById('menuToggle');
-    const navLinks = document.getElementById('navLinks');
-
-    menuToggle.addEventListener('click', () => {
-      navLinks.classList.toggle('active');
-    });
-  </script>
+  <!-- Enlace al JS -->
+  <script src="script.js"></script>
 </body>
 </html>

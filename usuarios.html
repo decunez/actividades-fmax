@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios - Sistema FMAX</title>
+  <!-- Fuente Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Estilos específicos para la tabla de usuarios */
+    .table-container {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .loading-cell {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Navegación -->
+  <nav class="navbar">
+    <div class="brand">Actividades <span id="nombre-usuario">FMAX</span></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="usuarios.html" class="active">Usuarios</a></li>
+      <li><a href="reportes.html">Reportes</a></li>
+      <li><a href="configuracion.html">Configuración</a></li>
+    </ul>
+  </nav>
+
+  <!-- Contenido Principal -->
+  <main class="container">
+    <section class="header-section">
+      <div>
+        <h1>Gestión de Usuarios</h1>
+        <p style="color: var(--text-muted);">Directorio de usuarios registrados en el sistema</p>
+      </div>
+      <button class="btn-primary">+ Nuevo Usuario</button>
+    </section>
+
+    <!-- Tabla dinámicamente poblada por script.js -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Dirección</th>
+            <th>Sector</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-usuarios">
+          <tr>
+            <td colspan="5" class="loading-cell">Cargando usuarios desde la base de datos...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Pie de página -->
+  <footer>
+    <p>&copy; 2026 Sistema FMAX - Todos los derechos reservados</p>
+  </footer>
+
+  <!-- Enlace a la lógica dinámica -->
+  <script src="script.js"></script>
+</body>
+</html>
