@@ -313,6 +313,7 @@
         } else if (val === 'VISITA') {
           selectForma.innerHTML = `
             <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
+            <option value="NORMAL">RECABLEADO</option>
             <option value="NORMAL">NORMAL</option>
           `;
         } else {
@@ -385,8 +386,16 @@ function calcularTotal() {
       const ac = Number(document.querySelector('input[name="ac"]:checked')?.value) || 0;
 
       // Asignación basada en la forma de la actividad
-      const cantidadAct = (forma === 'DUCTERIA') ? 2 : 1;
-      const valAct = (forma === 'DUCTERIA') ? 14.00 : 7.00;
+let cantidadAct = 1;
+let valAct = 6.00; // Valor por defecto (NORMAL)
+
+if (forma.includes('DUCTERIA')) {
+  cantidadAct = 2;
+  valAct = 14.00;
+} else if (forma === 'RECABLEADO') {
+  cantidadAct = 1;
+  valAct = 7.00;
+}0;
 
       const excedente = fibra > 300 ? fibra - 300 : 0;
       const valExcedente = excedente * 0.04;
