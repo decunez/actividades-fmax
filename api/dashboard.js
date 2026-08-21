@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     const [kpis] = await connection.execute(`
       SELECT 
         COUNT(*) AS total_registros,
-        COALESCE(SUM(cantidad_act), 0) AS total_actividades,
+        COALESCE(SUM(CAST(cantidad_act AS UNSIGNED)), 0) AS total_actividades,
         COALESCE(SUM(total_act), 0) AS total_monto,
         COALESCE(SUM(exedente), 0) AS total_excedente_m,
         COALESCE(SUM(valor_exedente), 0) AS total_excedente_val,
@@ -41,21 +41,21 @@ export default async function handler(req, res) {
       FROM act_detalles ${whereClause}
     `, params);
 
-    // 2. Desglose Propia vs Externa (Sumatoria de cantidad_act)
+    // 2. Desglose Cuadrilla (Suma exacta de cantidad_act -> 14)
     const [origenData] = await connection.execute(`
       SELECT 
         CASE WHEN UPPER(cuadrilla) = 'PROPIA' THEN 'PROPIA' ELSE 'EXTERNA' END AS origen,
-        COALESCE(SUM(cantidad_act), 0) AS registros,
+        COALESCE(SUM(CAST(cantidad_act AS UNSIGNED)), 0) AS registros,
         COALESCE(SUM(total_act), 0) AS monto
       FROM act_detalles ${whereClause}
       GROUP BY origen
     `, params);
 
-    // 3. Desglose por Tipo de Actividad (Sumatoria de cantidad_act)
+    // 3. Desglose por Tipo de Actividad (Suma exacta de cantidad_act -> 14)
     const [tipoData] = await connection.execute(`
       SELECT 
         tipo_actividad,
-        COALESCE(SUM(cantidad_act), 0) AS cantidad,
+        COALESCE(SUM(CAST(cantidad_act AS UNSIGNED)), 0) AS cantidad,
         COALESCE(SUM(total_act), 0) AS monto
       FROM act_detalles ${whereClause}
       GROUP BY tipo_actividad
