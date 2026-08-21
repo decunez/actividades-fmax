@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Actividad Externa - Sistema FMAX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .form-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .form-control {
+      padding: 0.75rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      margin-top: 0.25rem;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .summary-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .summary-item span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-item strong {
+      font-size: 1.1rem;
+      color: var(--text-main);
+    }
+
+    .summary-item.total strong {
+      color: #10b981;
+      font-size: 1.3rem;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="brand">Actividad Externa <span id="nombre-usuario">FMAX</span></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html">Inicio</a></li>
+      <li><a href="usuarios.html">Usuarios</a></li>
+      <li><a href="actividad-propia.html">Actividad Propia</a></li>
+      <li><a href="actividad-externa.html" class="active">Actividad Externa</a></li>
+      <li><a href="actividades.html">Listado Actividades</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <section class="header-section" style="text-align: center; margin-bottom: 2rem;">
+      <h1>Registrar Actividad Externa</h1>
+      <p style="color: var(--text-muted);">Registro de actividades de cuadrillas externas</p>
+    </section>
+
+    <div class="form-card">
+      <form id="form-actividad">
+        <div class="form-grid">
+
+          <!-- Cuadrilla (Sustituye al campo Usuario) -->
+          <div class="form-group">
+            <label for="select_cuadrilla">Cuadrilla *</label>
+            <select id="select_cuadrilla" class="form-control" required>
+              <option value="">Seleccione Cuadrilla...</option>
+              <option value="JUAN PABLO">JUAN PABLO</option>
+              <option value="DIEGO REA">DIEGO REA</option>
+              <option value="DARWIN COLLAGUAZO">DARWIN COLLAGUAZO</option>
+              <option value="ALEXIS CHICANGO">ALEXIS CHICANGO</option>
+              <option value="OTRO">OTRO</option>
+            </select>
+            <input type="text" id="custom_cuadrilla" class="form-control hidden" placeholder="Escriba el nombre de la cuadrilla..." style="margin-top: 0.4rem;">
+          </div>
+
+          <!-- Sector -->
+          <div class="form-group">
+            <label for="select_sector">Sector *</label>
+            <select id="select_sector" class="form-control" required>
+              <option value="">Seleccione Sector...</option>
+              <option value="VALLE">VALLE</option>
+              <option value="SUR">SUR</option>
+              <option value="CENTRO">CENTRO</option>
+              <option value="NORTE">NORTE</option>
+              <option value="OTRO">OTRO</option>
+            </select>
+            <input type="text" id="custom_sector" class="form-control hidden" placeholder="Escriba el sector..." style="margin-top: 0.4rem;">
+          </div>
+
+          <!-- Nombre del Cliente -->
+          <div class="form-group">
+            <label for="cliente">Nombre del Cliente</label>
+            <input type="text" id="cliente" class="form-control" placeholder="Ej: Juan Pérez (Opcional)">
+          </div>
+
+          <!-- Fecha -->
+          <div class="form-group">
+            <label for="fecha">Fecha *</label>
+            <input type="date" id="fecha" class="form-control" required>
+          </div>
+
+          <!-- Tipo de Actividad -->
+          <div class="form-group">
+            <label for="tipo_actividad">Tipo de Actividad *</label>
+            <select id="tipo_actividad" class="form-control" required>
+              <option value="">Seleccione...</option>
+              <option value="INSTALACION">INSTALACION</option>
+              <option value="TRASLADO">TRASLADO</option>
+              <option value="VISITA">VISITA</option>
+            </select>
+          </div>
+
+          <!-- Forma de Actividad -->
+          <div class="form-group">
+            <label for="forma_actividad">Forma de Actividad *</label>
+            <select id="forma_actividad" class="form-control" required disabled>
+              <option value="">Seleccione tipo primero...</option>
+            </select>
+          </div>
+
+          <!-- Cantidad Fibra -->
+          <div class="form-group">
+            <label for="cantidad_fibra">Cantidad Fibra (metros)</label>
+            <input type="number" id="cantidad_fibra" class="form-control" value="0" min="0">
+          </div>
+
+          <!-- Punto de Red -->
+          <div class="form-group">
+            <label>¿Punto de Red?</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="punto_red" value="0" checked> NO
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="punto_red" value="1"> SI
+              </label>
+            </div>
+          </div>
+
+          <!-- Equipo AC -->
+          <div class="form-group">
+            <label>¿Equipo AC?</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="ac" value="0" checked> NO
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="ac" value="1"> SI
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Card Resumen Calculado -->
+        <div class="summary-card">
+          <div class="summary-item">
+            <span>Cantidad</span>
+            <strong id="sum-cant">1</strong>
+          </div>
+          <div class="summary-item">
+            <span>Valor Actividad</span>
+            <strong id="sum-val-act">$0.00</strong>
+          </div>
+          <div class="summary-item">
+            <span>Excedente (m)</span>
+            <strong id="sum-excedente">0</strong>
+          </div>
+          <div class="summary-item">
+            <span>Valor Excedente</span>
+            <strong id="sum-val-excedente">$0.00</strong>
+          </div>
+          <div class="summary-item">
+            <span>Punto de Red</span>
+            <strong id="sum-val-pred">$0.00</strong>
+          </div>
+          <div class="summary-item">
+            <span>Equipo AC</span>
+            <strong id="sum-val-ac">$0.00</strong>
+          </div>
+          <div class="summary-item total">
+            <span>TOTAL ACTIVIDAD</span>
+            <strong id="sum-total">$0.00</strong>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="actions">
+          <button type="button" class="btn-secondary" onclick="window.location.href='actividades.html'">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-guardar">Guardar Actividad</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../script.js"></script>
+  <script>
+    const API_GUARDAR = 'https://actividades-fmax.vercel.app/api/guardar-actividad';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fecha por defecto hoy
+      document.getElementById('fecha').valueAsDate = new Date();
+
+      const selectCuadrilla = document.getElementById('select_cuadrilla');
+      const customCuadrilla = document.getElementById('custom_cuadrilla');
+      const selectSector = document.getElementById('select_sector');
+      const customSector = document.getElementById('custom_sector');
+
+      // Mostrar/Ocultar campos "OTRO"
+      selectCuadrilla.addEventListener('change', () => {
+        if (selectCuadrilla.value === 'OTRO') {
+          customCuadrilla.classList.remove('hidden');
+          customCuadrilla.required = true;
+        } else {
+          customCuadrilla.classList.add('hidden');
+          customCuadrilla.required = false;
+        }
+      });
+
+      selectSector.addEventListener('change', () => {
+        if (selectSector.value === 'OTRO') {
+          customSector.classList.remove('hidden');
+          customSector.required = true;
+        } else {
+          customSector.classList.add('hidden');
+          customSector.required = false;
+        }
+      });
+
+      // Dinámica de Forma de Actividad segun Tipo
+      const selectTipo = document.getElementById('tipo_actividad');
+      const selectForma = document.getElementById('forma_actividad');
+
+      selectTipo.addEventListener('change', () => {
+        const val = selectTipo.value;
+        selectForma.innerHTML = '';
+        selectForma.disabled = false;
+
+        if (val === 'INSTALACION' || val === 'TRASLADO') {
+          selectForma.innerHTML = `
+            <option value="NORMAL">NORMAL</option>
+            <option value="DUCTERIA">DUCTERIA</option>
+          `;
+        } else if (val === 'VISITA') {
+          selectForma.innerHTML = `
+            <option value="DUCTERIA">DUCTERIA</option>
+            <option value="NORMAL">NORMAL</option>
+          `;
+        } else {
+          selectForma.disabled = true;
+          selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
+        }
+        calcularTotal();
+      });
+
+      // Eventos de recálculo
+      selectForma.addEventListener('change', calcularTotal);
+      document.getElementById('cantidad_fibra').addEventListener('input', calcularTotal);
+      document.querySelectorAll('input[name="punto_red"]').forEach(r => r.addEventListener('change', calcularTotal));
+      document.querySelectorAll('input[name="ac"]').forEach(r => r.addEventListener('change', calcularTotal));
+
+      // Guardar formulario
+      document.getElementById('form-actividad').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const cuadrillaFinal = selectCuadrilla.value === 'OTRO' ? customCuadrilla.value : selectCuadrilla.value;
+        const sectorFinal = selectSector.value === 'OTRO' ? customSector.value : selectSector.value;
+
+        const data = {
+          id_usuario: 1, // ID por defecto en segundo plano
+          cuadrilla: cuadrillaFinal,
+          sector: sectorFinal,
+          cliente: document.getElementById('cliente').value,
+          fecha: document.getElementById('fecha').value,
+          tipo_actividad: selectTipo.value,
+          forma_actividad: selectForma.value,
+          cantidad_fibra: Number(document.getElementById('cantidad_fibra').value) || 0,
+          punto_red: Number(document.querySelector('input[name="punto_red"]:checked').value) || 0,
+          ac: Number(document.querySelector('input[name="ac"]:checked').value) || 0
+        };
+
+        const btn = document.getElementById('btn-guardar');
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+
+        try {
+          const res = await fetch(API_GUARDAR, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          const result = await res.json();
+
+          if (res.ok && result.success) {
+            alert('Actividad externa guardada correctamente');
+            window.location.href = 'actividades.html';
+          } else {
+            alert('Error al guardar: ' + (result.error || 'Ocurrió un problema'));
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Error de conexión con el servidor');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Guardar Actividad';
+        }
+      });
+    });
+
+    function calcularTotal() {
+      const tipo = document.getElementById('tipo_actividad').value;
+      const forma = document.getElementById('forma_actividad').value;
+      const fibra = Number(document.getElementById('cantidad_fibra').value) || 0;
+      const pred = Number(document.querySelector('input[name="punto_red"]:checked')?.value) || 0;
+      const ac = Number(document.querySelector('input[name="ac"]:checked')?.value) || 0;
+
+      let valAct = 0;
+      if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
+        valAct = (forma === 'DUCTERIA') ? 14.00 : 7.00;
+      } else if (tipo === 'VISITA') {
+        valAct = 14.00;
+      }
+
+      const excedente = fibra > 200 ? fibra - 200 : 0;
+      const valExcedente = excedente * 0.04;
+      const valPred = pred * 5.00;
+      const valAc = ac * 5.00;
+      const total = valAct + valExcedente + valPred + valAc;
+
+      document.getElementById('sum-val-act').textContent = `$${valAct.toFixed(2)}`;
+      document.getElementById('sum-excedente').textContent = `${excedente} m`;
+      document.getElementById('sum-val-excedente').textContent = `$${valExcedente.toFixed(2)}`;
+      document.getElementById('sum-val-pred').textContent = `$${valPred.toFixed(2)}`;
+      document.getElementById('sum-val-ac').textContent = `$${valAc.toFixed(2)}`;
+      document.getElementById('sum-total').textContent = `$${total.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>
