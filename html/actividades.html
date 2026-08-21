@@ -17,7 +17,7 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
       align-items: end;
     }
@@ -44,13 +44,13 @@
       font-size: 0.9rem;
     }
 
-    .form-control:focus {
-      border-color: var(--accent);
+    .form-control:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
-    .filter-actions {
-      display: flex;
-      gap: 0.5rem;
+    .form-control:focus:not(:disabled) {
+      border-color: var(--accent);
     }
 
     .kpi-grid {
@@ -157,16 +157,11 @@
 
     <!-- Filtros -->
     <div class="filter-card">
-      <form id="form-filtros" class="filter-grid">
+      <div class="filter-grid">
         <div class="form-group">
-          <label for="fecha">Fecha Exacta</label>
-          <input type="date" id="fecha" class="form-control">
-        </div>
-
-        <div class="form-group">
-          <label for="periodo">Período Facturación (2026)</label>
+          <label for="periodo">1. Seleccionar Período (2026)</label>
           <select id="periodo" class="form-control">
-            <option value="">TODOS LOS PERÍODOS</option>
+            <option value="">-- SELECCIONE PERÍODO --</option>
             <option value="2025-12-25|2026-01-26">Ene (25 Dic 2025 - 26 Ene 2026)</option>
             <option value="2026-01-25|2026-02-26">Feb (25 Ene 2026 - 26 Feb 2026)</option>
             <option value="2026-02-25|2026-03-26">Mar (25 Feb 2026 - 26 Mar 2026)</option>
@@ -180,6 +175,11 @@
             <option value="2026-10-25|2026-11-26">Nov (25 Oct 2026 - 26 Nov 2026)</option>
             <option value="2026-11-25|2026-12-26">Dic (25 Nov 2026 - 26 Dic 2026)</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fecha">Fecha Exacta</label>
+          <input type="date" id="fecha" class="form-control">
         </div>
 
         <div class="form-group">
@@ -199,11 +199,10 @@
           </select>
         </div>
 
-        <div class="filter-actions">
-          <button type="submit" class="btn-primary" style="padding: 0.75rem 1rem;">Filtrar</button>
-          <button type="button" id="btn-limpiar" class="btn-secondary" style="padding: 0.75rem 1rem;">Limpiar</button>
+        <div>
+          <button type="button" id="btn-limpiar" class="btn-secondary" style="width: 100%; padding: 0.75rem;">Limpiar Filtros</button>
         </div>
-      </form>
+      </div>
     </div>
 
     <!-- KPIs Resumen -->
@@ -237,7 +236,7 @@
       </div>
     </div>
 
-    <!-- Tabla de resultados -->
+    <!-- Tabla -->
     <div class="table-container">
       <table>
         <thead>
@@ -265,81 +264,118 @@
   <script>
     const API_BASE = 'https://actividades-fmax.vercel.app/api/actividades';
 
+    const inputPeriodo = document.getElementById('periodo');
+    const inputFecha = document.getElementById('fecha');
+    const inputTipo = document.getElementById('tipo_actividad');
+    const inputSector = document.getElementById('sector');
+
     document.addEventListener('DOMContentLoaded', async () => {
-      // Limpiar un selector al usar el otro
-      document.getElementById('fecha').addEventListener('change', () => {
-        if (document.getElementById('fecha').value) {
-          document.getElementById('periodo').value = '';
-        }
-      });
-
-      document.getElementById('periodo').addEventListener('change', () => {
-        if (document.getElementById('periodo').value) {
-          document.getElementById('fecha').value = '';
-        }
-      });
-
-      // Cargar lista dinámica de sectores y luego consultar actividades iniciales
       await cargarSectores();
+      evaluarEstadoFiltros();
       cargarActividades();
 
-      document.getElementById('form-filtros').addEventListener('submit', (e) => {
-        e.preventDefault();
+      // Evento 1: Cambiar período habilita los demás
+      inputPeriodo.addEventListener('change', () => {
+        evaluarEstadoFiltros();
+        inputFecha.value = '';
+        inputTipo.value = 'TODOS';
+        inputSector.value = 'TODOS';
+
+        if (inputPeriodo.value) {
+          cargarActividades();
+        } else {
+          resetearKPIs();
+          document.getElementById('tabla-body').innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
+        }
+      });
+
+      // Evento 2: Seleccionar Fecha limpia Tipo y Sector
+      inputFecha.addEventListener('change', () => {
+        if (inputFecha.value) {
+          inputTipo.value = 'TODOS';
+          inputSector.value = 'TODOS';
+        }
         cargarActividades();
       });
 
+      // Evento 3: Seleccionar Tipo limpia Fecha y Sector
+      inputTipo.addEventListener('change', () => {
+        if (inputTipo.value !== 'TODOS') {
+          inputFecha.value = '';
+          inputSector.value = 'TODOS';
+        }
+        cargarActividades();
+      });
+
+      // Evento 4: Seleccionar Sector limpia Fecha y Tipo
+      inputSector.addEventListener('change', () => {
+        if (inputSector.value !== 'TODOS') {
+          inputFecha.value = '';
+          inputTipo.value = 'TODOS';
+        }
+        cargarActividades();
+      });
+
+      // Botón Limpiar
       document.getElementById('btn-limpiar').addEventListener('click', () => {
-        document.getElementById('fecha').value = '';
-        document.getElementById('periodo').value = '2026-07-25|2026-08-26'; // Período por defecto
-        document.getElementById('tipo_actividad').value = 'TODOS';
-        document.getElementById('sector').value = 'TODOS';
+        inputPeriodo.value = '2026-07-25|2026-08-26';
+        inputFecha.value = '';
+        inputTipo.value = 'TODOS';
+        inputSector.value = 'TODOS';
+        evaluarEstadoFiltros();
         cargarActividades();
       });
     });
+
+    function evaluarEstadoFiltros() {
+      const habilitar = Boolean(inputPeriodo.value);
+      inputFecha.disabled = !habilitar;
+      inputTipo.disabled = !habilitar;
+      inputSector.disabled = !habilitar;
+    }
 
     async function cargarSectores() {
       try {
         const res = await fetch(`${API_BASE}?obtener_sectores=true`);
         const sectores = await res.json();
         
-        const selectSector = document.getElementById('sector');
-        selectSector.innerHTML = '<option value="TODOS">TODOS LOS SECTORES</option>';
+        inputSector.innerHTML = '<option value="TODOS">TODOS LOS SECTORES</option>';
 
         if (Array.isArray(sectores)) {
           sectores.forEach(sec => {
-            const option = document.createElement('option');
-            option.value = sec;
-            option.textContent = sec;
-            selectSector.appendChild(option);
+            const nombreSec = typeof sec === 'object' ? (sec.sector || '') : sec;
+            if (nombreSec) {
+              const option = document.createElement('option');
+              option.value = nombreSec;
+              option.textContent = nombreSec;
+              inputSector.appendChild(option);
+            }
           });
         }
       } catch (e) {
-        console.error("Error al cargar sectores:", e);
+        console.error("Error cargando sectores:", e);
       }
     }
 
     async function cargarActividades() {
-      const fecha = document.getElementById('fecha').value;
-      const periodo = document.getElementById('periodo').value;
-      const tipo = document.getElementById('tipo_actividad').value;
-      const sector = document.getElementById('sector').value;
+      if (!inputPeriodo.value) return;
 
       const params = new URLSearchParams();
 
-      if (fecha) {
-        params.append('fecha', fecha);
-      } else if (periodo) {
-        const [fInicio, fFin] = periodo.split('|');
+      if (inputFecha.value) {
+        params.append('fecha', inputFecha.value);
+      } else {
+        const [fInicio, fFin] = inputPeriodo.value.split('|');
         params.append('fecha_inicio', fInicio);
         params.append('fecha_fin', fFin);
       }
 
-      if (tipo && tipo !== 'TODOS') {
-        params.append('tipo_actividad', tipo);
+      if (inputTipo.value !== 'TODOS') {
+        params.append('tipo_actividad', inputTipo.value);
       }
 
-      if (sector && sector !== 'TODOS') {
-        params.append('sector', sector);
+      if (inputSector.value !== 'TODOS') {
+        params.append('sector', inputSector.value);
       }
 
       const tbody = document.getElementById('tabla-body');
@@ -368,8 +404,7 @@
           sumaMonto += totalNum;
 
           const cantParsed = parseInt(item.cantidad_act, 10);
-          const cantAct = (!isNaN(cantParsed) && cantParsed > 0) ? cantParsed : 1;
-          totalCantAct += cantAct;
+          totalCantAct += (!isNaN(cantParsed) && cantParsed > 0) ? cantParsed : 1;
 
           cantExcedente += parseInt(item.exedente) || 0;
           valExcedente += parseFloat(item.valor_exedente) || 0;
