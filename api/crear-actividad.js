@@ -35,7 +35,7 @@ export default async function handler(req, res) {
         ac, valor_ac, exedente, valor_exedente, total_act
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        id_usuario, cliente || '', fecha, cuadrilla || 'PROPIA', sector || '', tipo_actividad,
+        id_usuario, cliente || 'NO DEFINIDO', fecha, cuadrilla || 'PROPIA', sector || '', tipo_actividad,
         forma_actividad, cantidad_act, valor_actividad, cantidad_fibra || 0,
         punto_red, valor_pred, ac, valor_ac, exedente, valor_exedente, total_act || 0.00
       ]

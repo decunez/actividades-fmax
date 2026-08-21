@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listado de Actividades - Sistema FMAX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .filter-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .form-control {
+      padding: 0.75rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .table-container {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--border);
+      color: var(--text-main);
+    }
+
+    .badge-instalacion { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .badge-traslado { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .badge-visita { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+    .kpi-bar {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      flex: 1;
+    }
+
+    .kpi-card span {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .kpi-card strong {
+      font-size: 1.5rem;
+      color: #10b981;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="brand">Actividades <span id="nombre-usuario">FMAX</span></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html">Inicio</a></li>
+      <li><a href="usuarios.html">Usuarios</a></li>
+      <li><a href="actividad-propia.html">Actividad Propia</a></li>
+      <li><a href="actividades.html" class="active">Listado Actividades</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <section class="header-section">
+      <div>
+        <h1>Listado de Actividades</h1>
+        <p style="color: var(--text-muted);">Consulta y filtrado de registros</p>
+      </div>
+    </section>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+      <form id="form-filtros" class="filter-grid">
+        <div class="form-group">
+          <label for="fecha_inicio">Fecha Desde</label>
+          <input type="date" id="fecha_inicio" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="fecha_fin">Fecha Hasta</label>
+          <input type="date" id="fecha_fin" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label for="tipo_actividad">Tipo de Actividad</label>
+          <select id="tipo_actividad" class="form-control">
+            <option value="TODOS">TODOS</option>
+            <option value="INSTALACION">INSTALACION</option>
+            <option value="TRASLADO">TRASLADO</option>
+            <option value="VISITA">VISITA</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn-primary" style="padding: 0.75rem 1.25rem;">Filtrar</button>
+          <button type="button" id="btn-limpiar" class="btn-secondary" style="padding: 0.75rem 1.25rem;">Limpiar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Indicadores -->
+    <div class="kpi-bar">
+      <div class="kpi-card">
+        <span>Total Registros</span>
+        <strong id="kpi-total-registros" style="color: var(--text-main);">0</strong>
+      </div>
+      <div class="kpi-card">
+        <span>Monto Total</span>
+        <strong id="kpi-monto-total">$0.00</strong>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Usuario</th>
+            <th>Cliente</th>
+            <th>Tipo</th>
+            <th>Forma</th>
+            <th>Fibra</th>
+            <th>Pt. Red</th>
+            <th>AC</th>
+            <th>Total ($)</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body">
+          <tr>
+            <td colspan="9" style="text-align: center; color: var(--text-muted);">Cargando registros...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarActividades();
+
+      document.getElementById('form-filtros').addEventListener('submit', (e) => {
+        e.preventDefault();
+        cargarActividades();
+      });
+
+      document.getElementById('btn-limpiar').addEventListener('click', () => {
+        document.getElementById('fecha_inicio').value = '';
+        document.getElementById('fecha_fin').value = '';
+        document.getElementById('tipo_actividad').value = 'TODOS';
+        cargarActividades();
+      });
+    });
+
+    async function cargarActividades() {
+      const fechaInicio = document.getElementById('fecha_inicio').value;
+      const fechaFin = document.getElementById('fecha_fin').value;
+      const tipo = document.getElementById('tipo_actividad').value;
+
+      const params = new URLSearchParams();
+      if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+      if (fechaFin) params.append('fecha_fin', fechaFin);
+      if (tipo && tipo !== 'TODOS') params.append('tipo_actividad', tipo);
+
+      const tbody = document.getElementById('tabla-body');
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Cargando...</td></tr>';
+
+      try {
+        const res = await fetch(`https://actividades-fmax.vercel.app/api/actividades?${params.toString()}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
+          document.getElementById('kpi-total-registros').textContent = '0';
+          document.getElementById('kpi-monto-total').textContent = '$0.00';
+          return;
+        }
+
+        let sumaTotal = 0;
+        tbody.innerHTML = '';
+
+        data.forEach(item => {
+          const totalNum = parseFloat(item.total_act) || 0;
+          sumaTotal += totalNum;
+
+          const fechaFormateada = item.fecha ? item.fecha.toString().substring(0, 10) : '-';
+          
+          let badgeClass = 'badge';
+          if (item.tipo_actividad === 'INSTALACION') badgeClass += ' badge-instalacion';
+          else if (item.tipo_actividad === 'TRASLADO') badgeClass += ' badge-traslado';
+          else if (item.tipo_actividad === 'VISITA') badgeClass += ' badge-visita';
+
+          tbody.innerHTML += `
+            <tr>
+              <td>${fechaFormateada}</td>
+              <td>${item.nombre_usuario || 'ID ' + item.id_usuario}</td>
+              <td>${item.cliente || 'NO DEFINIDO'}</td>
+              <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
+              <td>${item.forma_actividad}</td>
+              <td>${item.cantidad_fibra || 0} m</td>
+              <td>${item.punto_red || 0}</td>
+              <td>${item.ac || 0}</td>
+              <td style="font-weight: 600; color: #10b981;">$${totalNum.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+
+        document.getElementById('kpi-total-registros').textContent = data.length;
+        document.getElementById('kpi-monto-total').textContent = `$${sumaTotal.toFixed(2)}`;
+
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

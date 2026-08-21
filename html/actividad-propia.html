@@ -108,8 +108,8 @@
   <main class="container">
     <section class="header-section">
       <div>
-        <h1>Registrar Actividad Propia</h1>
-        <p style="color: var(--text-muted);">Ingreso de actividades de cuadrilla propia</p>
+        <h1>Registrar Actividad</h1>
+        <p style="color: var(--text-muted);">Registro de actividad Otros valles</p>
       </div>
     </section>
 
@@ -127,9 +127,9 @@
 
           <!-- Nombre del Cliente -->
           <div class="form-group">
-            <label for="cliente">Nombre del Cliente *</label>
-            <input type="text" id="cliente" class="form-control" placeholder="Ej: Juan Pérez" required>
-          </div>
+  <label for="cliente">Nombre del Cliente</label>
+  <input type="text" id="cliente" class="form-control" placeholder="Ej: Juan Pérez (Opcional)">
+</div>
 
           <!-- Fecha -->
           <div class="form-group">
@@ -188,7 +188,7 @@
 
           <!-- AC (Radio Buttons) -->
           <div class="form-group">
-            <label>¿AC?</label>
+            <label>¿Equipo AC?</label>
             <div class="radio-container">
               <label class="radio-label">
                 <input type="radio" name="tiene_ac" value="NO" checked> NO
@@ -215,7 +215,7 @@
         <!-- Resumen de Valores Calculados Automáticamente -->
         <div class="summary-box">
           <div class="summary-item">
-            <span>Cant. Actividad</span>
+            <span>Cantidad</span>
             <strong id="disp_cantidad_act">1</strong>
           </div>
           <div class="summary-item">
@@ -223,11 +223,11 @@
             <strong id="disp_valor_actividad">$0.00</strong>
           </div>
           <div class="summary-item">
-            <span>Valor Pred</span>
+            <span>Punto de Red</span>
             <strong id="disp_valor_pred">$0.00</strong>
           </div>
           <div class="summary-item">
-            <span>Valor AC</span>
+            <span>Equipo AC</span>
             <strong id="disp_valor_ac">$0.00</strong>
           </div>
           <div class="summary-item">
@@ -244,9 +244,10 @@
           </div>
         </div>
 
-        <div style="margin-top: 1.5rem; text-align: right;">
-          <button type="submit" class="btn-primary" style="padding: 0.85rem 2rem;">Guardar Actividad</button>
-        </div>
+        <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem; align-items: center;">
+  <a href="../index.html" class="btn-secondary" style="padding: 0.85rem 2rem; text-decoration: none;">Cancelar</a>
+  <button type="submit" class="btn-primary" style="padding: 0.85rem 2rem;">Guardar Actividad</button>
+</div>
       </form>
     </div>
   </main>
@@ -283,19 +284,27 @@
 
     let usuariosCache = [];
 
-    async function cargarUsuariosSelect() {
-      const select = document.getElementById('id_usuario');
-      try {
-        const res = await fetch('https://actividades-fmax.vercel.app/api/usuarios');
-        usuariosCache = await res.json();
-        select.innerHTML = '<option value="">Seleccione un usuario...</option>';
-        usuariosCache.forEach(u => {
-          select.innerHTML += `<option value="${u.id}">${u.nombre} (${u.sector || 'S/N'})</option>`;
-        });
-      } catch (err) {
-        select.innerHTML = '<option value="">Error al cargar usuarios</option>';
-      }
+async function cargarUsuariosSelect() {
+  const select = document.getElementById('id_usuario');
+  try {
+    const res = await fetch('https://actividades-fmax.vercel.app/api/usuarios');
+    usuariosCache = await res.json();
+    select.innerHTML = '<option value="">Seleccione un usuario...</option>';
+    
+    usuariosCache.forEach(u => {
+      // Auto-seleccionar si el ID es 1
+      const selectedAttr = u.id == 1 ? 'selected' : '';
+      select.innerHTML += `<option value="${u.id}" ${selectedAttr}>${u.nombre} (${u.sector || 'S/N'})</option>`;
+    });
+
+    // Forzar la selección por código por si acaso
+    if (usuariosCache.some(u => u.id == 1)) {
+      select.value = '1';
     }
+  } catch (err) {
+    select.innerHTML = '<option value="">Error al cargar usuarios</option>';
+  }
+}
 
     function actualizarFormaActividad() {
       const tipo = document.getElementById('tipo_actividad').value;
@@ -307,13 +316,13 @@
       if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
         selectForma.innerHTML = `
           <option value="NORMAL">NORMAL</option>
-          <option value="DUCTERIA">DUCTERIA</option>
+          <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
         `;
       } else if (tipo === 'VISITA') {
         selectForma.innerHTML = `
           <option value="NORMAL">NORMAL</option>
           <option value="RECABLEADO NORMAL">RECABLEADO NORMAL</option>
-          <option value="DUCTERIA">DUCTERIA</option>
+          <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
         `;
       } else {
         selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
@@ -372,49 +381,53 @@
       };
     }
 
-    async function guardarActividad(e) {
-      e.preventDefault();
-      const calc = calcularValores();
-      const usuarioSel = usuariosCache.find(u => u.id == document.getElementById('id_usuario').value);
+async function guardarActividad(e) {
+  e.preventDefault();
+  const calc = calcularValores();
+  const usuarioSel = usuariosCache.find(u => u.id == document.getElementById('id_usuario').value);
 
-      const payload = {
-        id_usuario: parseInt(document.getElementById('id_usuario').value),
-        cliente: document.getElementById('cliente').value,
-        fecha: document.getElementById('fecha').value,
-        cuadrilla: 'PROPIA',
-        sector: usuarioSel ? usuarioSel.sector : '',
-        tipo_actividad: document.getElementById('tipo_actividad').value,
-        forma_actividad: document.getElementById('forma_actividad').value,
-        cantidad_act: calc.cantidad_act,
-        valor_actividad: calc.valor_actividad,
-        cantidad_fibra: parseInt(document.getElementById('cantidad_fibra').value) || 0,
-        punto_red: calc.punto_red,
-        valor_pred: calc.valor_pred,
-        ac: calc.ac,
-        valor_ac: calc.valor_ac,
-        exedente: calc.exedente,
-        valor_exedente: calc.valor_exedente,
-        total_act: calc.total_act
-      };
+  // Si el campo cliente está vacío o tiene solo espacios, asigna 'NO DEFINIDO'
+  const clienteInput = document.getElementById('cliente').value.trim();
+  const clienteFinal = clienteInput !== '' ? clienteInput : 'NO DEFINIDO';
 
-      try {
-        const res = await fetch('https://actividades-fmax.vercel.app/api/crear-actividad', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+  const payload = {
+    id_usuario: parseInt(document.getElementById('id_usuario').value),
+    cliente: clienteFinal,
+    fecha: document.getElementById('fecha').value,
+    cuadrilla: 'PROPIA',
+    sector: usuarioSel ? usuarioSel.sector : '',
+    tipo_actividad: document.getElementById('tipo_actividad').value,
+    forma_actividad: document.getElementById('forma_actividad').value,
+    cantidad_act: calc.cantidad_act,
+    valor_actividad: calc.valor_actividad,
+    cantidad_fibra: parseInt(document.getElementById('cantidad_fibra').value) || 0,
+    punto_red: calc.punto_red,
+    valor_pred: calc.valor_pred,
+    ac: calc.ac,
+    valor_ac: calc.valor_ac,
+    exedente: calc.exedente,
+    valor_exedente: calc.valor_exedente,
+    total_act: calc.total_act
+  };
 
-        if (res.ok) {
-          alert('Actividad registrada correctamente');
-          window.location.href = '../index.html';
-        } else {
-          alert('Error al guardar la actividad');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Error de conexión');
-      }
+  try {
+    const res = await fetch('https://actividades-fmax.vercel.app/api/crear-actividad', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      alert('Actividad registrada correctamente');
+      window.location.href = '../index.html';
+    } else {
+      alert('Error al guardar la actividad');
     }
+  } catch (err) {
+    console.error(err);
+    alert('Error de conexión');
+  }
+}
   </script>
 </body>
 </html>
