@@ -17,7 +17,7 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 1rem;
       align-items: end;
     }
@@ -140,11 +140,11 @@
     <div class="brand">Actividades <span id="nombre-usuario">FMAX</span></div>
     <button class="menu-toggle" id="menuToggle">☰</button>
     <ul class="nav-links" id="navLinks">
-      <li><a href="../index.html" class="active">Inicio</a></li>
+      <li><a href="../index.html">Inicio</a></li>
       <li><a href="usuarios.html">Usuarios</a></li>
-      <li><a href="actividades.html">Actividades</a></li>
-      <li><a href="reportes.html">Reportes</a></li>
-      <li><a href="configuracion.html">Configuración</a></li>
+      <li><a href="actividad-propia.html">Actividad Propia</a></li>
+      <li><a href="actividad-externa.html">Actividad Externa</a></li>
+      <li><a href="actividades.html" class="active">Listado Actividades</a></li>
     </ul>
   </nav>
 
@@ -190,6 +190,22 @@
             <option value="INSTALACION">INSTALACION</option>
             <option value="TRASLADO">TRASLADO</option>
             <option value="VISITA">VISITA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tipo_cuadrilla">Origen Cuadrilla</label>
+          <select id="tipo_cuadrilla" class="form-control">
+            <option value="TODOS">TODOS</option>
+            <option value="PROPIA">PROPIA</option>
+            <option value="EXTERNA">EXTERNA</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cuadrilla_especifica">Cuadrilla Externa</label>
+          <select id="cuadrilla_especifica" class="form-control" disabled>
+            <option value="TODOS">TODAS LAS EXTERNAS</option>
           </select>
         </div>
 
@@ -243,6 +259,7 @@
         <thead>
           <tr>
             <th>Fecha</th>
+            <th>Cuadrilla</th>
             <th>Cliente</th>
             <th>Tipo</th>
             <th>Forma</th>
@@ -254,7 +271,7 @@
         </thead>
         <tbody id="tabla-body">
           <tr>
-            <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando registros...</td>
+            <td colspan="9" style="text-align: center; color: var(--text-muted);">Cargando registros...</td>
           </tr>
         </tbody>
       </table>
@@ -268,60 +285,63 @@
     const inputPeriodo = document.getElementById('periodo');
     const inputFecha = document.getElementById('fecha');
     const inputTipo = document.getElementById('tipo_actividad');
+    const inputTipoCuadrilla = document.getElementById('tipo_cuadrilla');
+    const inputCuadrillaEspecifica = document.getElementById('cuadrilla_especifica');
     const inputSector = document.getElementById('sector');
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await cargarSectores();
+      await Promise.all([cargarSectores(), cargarCuadrillasExternas()]);
       evaluarEstadoFiltros();
       cargarActividades();
 
-      // Evento 1: Cambiar período habilita los demás
+      // Evento Periodo
       inputPeriodo.addEventListener('change', () => {
         evaluarEstadoFiltros();
         inputFecha.value = '';
         inputTipo.value = 'TODOS';
+        inputTipoCuadrilla.value = 'TODOS';
+        inputCuadrillaEspecifica.value = 'TODOS';
         inputSector.value = 'TODOS';
 
         if (inputPeriodo.value) {
           cargarActividades();
         } else {
           resetearKPIs();
-          document.getElementById('tabla-body').innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
+          document.getElementById('tabla-body').innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
         }
       });
 
-      // Evento 2: Seleccionar Fecha limpia Tipo y Sector
-      inputFecha.addEventListener('change', () => {
-        if (inputFecha.value) {
-          inputTipo.value = 'TODOS';
-          inputSector.value = 'TODOS';
+      // Filtro Fecha Exacta
+      inputFecha.addEventListener('change', cargarActividades);
+
+      // Filtro Tipo Actividad
+      inputTipo.addEventListener('change', cargarActividades);
+
+      // Filtro Origen Cuadrilla (PROPIA / EXTERNA / TODOS)
+      inputTipoCuadrilla.addEventListener('change', () => {
+        if (inputTipoCuadrilla.value === 'EXTERNA') {
+          inputCuadrillaEspecifica.disabled = false;
+        } else {
+          inputCuadrillaEspecifica.disabled = true;
+          inputCuadrillaEspecifica.value = 'TODOS';
         }
         cargarActividades();
       });
 
-      // Evento 3: Seleccionar Tipo limpia Fecha y Sector
-      inputTipo.addEventListener('change', () => {
-        if (inputTipo.value !== 'TODOS') {
-          inputFecha.value = '';
-          inputSector.value = 'TODOS';
-        }
-        cargarActividades();
-      });
+      // Filtro Cuadrilla Especifica
+      inputCuadrillaEspecifica.addEventListener('change', cargarActividades);
 
-      // Evento 4: Seleccionar Sector limpia Fecha y Tipo
-      inputSector.addEventListener('change', () => {
-        if (inputSector.value !== 'TODOS') {
-          inputFecha.value = '';
-          inputTipo.value = 'TODOS';
-        }
-        cargarActividades();
-      });
+      // Filtro Sector
+      inputSector.addEventListener('change', cargarActividades);
 
       // Botón Limpiar
       document.getElementById('btn-limpiar').addEventListener('click', () => {
         inputPeriodo.value = '2026-07-25|2026-08-26';
         inputFecha.value = '';
         inputTipo.value = 'TODOS';
+        inputTipoCuadrilla.value = 'TODOS';
+        inputCuadrillaEspecifica.value = 'TODOS';
+        inputCuadrillaEspecifica.disabled = true;
         inputSector.value = 'TODOS';
         evaluarEstadoFiltros();
         cargarActividades();
@@ -332,6 +352,8 @@
       const habilitar = Boolean(inputPeriodo.value);
       inputFecha.disabled = !habilitar;
       inputTipo.disabled = !habilitar;
+      inputTipoCuadrilla.disabled = !habilitar;
+      inputCuadrillaEspecifica.disabled = !habilitar || inputTipoCuadrilla.value !== 'EXTERNA';
       inputSector.disabled = !habilitar;
     }
 
@@ -339,7 +361,6 @@
       try {
         const res = await fetch(`${API_BASE}?obtener_sectores=true`);
         const sectores = await res.json();
-        
         inputSector.innerHTML = '<option value="TODOS">TODOS LOS SECTORES</option>';
 
         if (Array.isArray(sectores)) {
@@ -355,6 +376,27 @@
         }
       } catch (e) {
         console.error("Error cargando sectores:", e);
+      }
+    }
+
+    async function cargarCuadrillasExternas() {
+      try {
+        const res = await fetch(`${API_BASE}?obtener_cuadrillas=true`);
+        const cuadrillas = await res.json();
+        inputCuadrillaEspecifica.innerHTML = '<option value="TODOS">TODAS LAS EXTERNAS</option>';
+
+        if (Array.isArray(cuadrillas)) {
+          cuadrillas.forEach(c => {
+            if (c) {
+              const option = document.createElement('option');
+              option.value = c;
+              option.textContent = c;
+              inputCuadrillaEspecifica.appendChild(option);
+            }
+          });
+        }
+      } catch (e) {
+        console.error("Error cargando cuadrillas externas:", e);
       }
     }
 
@@ -375,19 +417,26 @@
         params.append('tipo_actividad', inputTipo.value);
       }
 
+      if (inputTipoCuadrilla.value !== 'TODOS') {
+        params.append('tipo_cuadrilla', inputTipoCuadrilla.value);
+        if (inputTipoCuadrilla.value === 'EXTERNA' && inputCuadrillaEspecifica.value !== 'TODOS') {
+          params.append('cuadrilla_especifica', inputCuadrillaEspecifica.value);
+        }
+      }
+
       if (inputSector.value !== 'TODOS') {
         params.append('sector', inputSector.value);
       }
 
       const tbody = document.getElementById('tabla-body');
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Cargando...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Cargando...</td></tr>';
 
       try {
         const res = await fetch(`${API_BASE}?${params.toString()}`);
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
           resetearKPIs();
           return;
         }
@@ -426,6 +475,7 @@
           tbody.innerHTML += `
             <tr>
               <td>${fechaFormateada}</td>
+              <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
               <td>${item.cliente || 'NO DEFINIDO'}</td>
               <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
               <td>${item.forma_actividad}</td>
@@ -449,7 +499,7 @@
 
       } catch (err) {
         console.error(err);
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
         resetearKPIs();
       }
     }

@@ -28,7 +28,17 @@ export default async function handler(req, res) {
       return res.status(200).json(sectores);
     }
 
-    const { fecha, fecha_inicio, fecha_fin, tipo_actividad, sector } = req.query;
+    // Endpoint para obtener cuadrillas externas (excluyendo 'PROPIA')
+    if (req.query.obtener_cuadrillas === 'true') {
+      const [rows] = await connection.execute(
+        `SELECT DISTINCT cuadrilla FROM act_detalles WHERE cuadrilla IS NOT NULL AND TRIM(cuadrilla) != '' AND UPPER(cuadrilla) != 'PROPIA' ORDER BY cuadrilla ASC`
+      );
+      await connection.end();
+      const cuadrillas = rows.map(r => r.cuadrilla).filter(Boolean);
+      return res.status(200).json(cuadrillas);
+    }
+
+    const { fecha, fecha_inicio, fecha_fin, tipo_actividad, sector, tipo_cuadrilla, cuadrilla_especifica } = req.query;
 
     let query = `
       SELECT a.*, u.nombre AS nombre_usuario 
@@ -60,6 +70,18 @@ export default async function handler(req, res) {
     if (sector && sector !== 'TODOS') {
       query += ` AND a.sector = ?`;
       params.push(sector);
+    }
+
+    // Filtros por cuadrilla
+    if (tipo_cuadrilla === 'PROPIA') {
+      query += ` AND UPPER(a.cuadrilla) = 'PROPIA'`;
+    } else if (tipo_cuadrilla === 'EXTERNA') {
+      if (cuadrilla_especifica && cuadrilla_especifica !== 'TODOS') {
+        query += ` AND a.cuadrilla = ?`;
+        params.push(cuadrilla_especifica);
+      } else {
+        query += ` AND (a.cuadrilla IS NULL OR UPPER(a.cuadrilla) != 'PROPIA')`;
+      }
     }
 
     query += ` ORDER BY a.fecha DESC, a.id DESC`;
