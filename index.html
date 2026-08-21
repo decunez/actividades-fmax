@@ -25,10 +25,14 @@
   <main class="container">
     <section class="header-section">
       <div>
-        <h1>Panel de Control</h1>
+        <h1>Dashboard</h1>
         <p style="color: var(--text-muted);">Gestión centralizada de tareas y proyectos</p>
       </div>
-      <button class="btn-primary">+ Nueva Actividad</button>
+<!-- Dos nuevos botones de actividad -->
+  <div class="action-buttons">
+    <button class="btn-primary" id="btn-actividad-propia">+ Actividad Propia</button>
+    <button class="btn-secondary" id="btn-actividad-externa">+ Actividad Externa</button>
+  </div>
     </section>
 
     <div class="grid" id="contenedor-actividades">
@@ -53,7 +57,7 @@
   </main>
 
   <footer>
-    <p>&copy; 2026 Sistema FMAX - Todos los derechos reservados</p>
+    <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
   </footer>
 
   <!-- Enlace al JS -->

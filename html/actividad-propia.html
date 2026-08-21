@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Actividad Propia - Sistema FMAX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .form-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .form-control {
+      padding: 0.75rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 6px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+    .summary-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+    .summary-item {
+      text-align: center;
+    }
+    .summary-item span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .summary-item strong {
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="brand">Actividades <span id="nombre-usuario">FMAX</span></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="../index.html">Inicio</a></li>
+      <li><a href="usuarios.html">Usuarios</a></li>
+      <li><a href="actividad-propia.html" class="active">Actividad Propia</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <section class="header-section">
+      <div>
+        <h1>Registrar Actividad Propia</h1>
+        <p style="color: var(--text-muted);">Ingreso de actividades de cuadrilla propia</p>
+      </div>
+    </section>
+
+    <div class="form-card">
+      <form id="form-actividad-propia">
+        <div class="form-grid">
+          
+          <!-- Usuario -->
+          <div class="form-group">
+            <label for="id_usuario">Usuario *</label>
+            <select id="id_usuario" class="form-control" required>
+              <option value="">Cargando usuarios...</option>
+            </select>
+          </div>
+
+          <!-- Fecha -->
+          <div class="form-group">
+            <label for="fecha">Fecha *</label>
+            <input type="date" id="fecha" class="form-control" required>
+          </div>
+
+          <!-- Tipo de Actividad -->
+          <div class="form-group">
+            <label for="tipo_actividad">Tipo de Actividad *</label>
+            <select id="tipo_actividad" class="form-control" required>
+              <option value="">Seleccione...</option>
+              <option value="INSTALACION">INSTALACION</option>
+              <option value="TRASLADO">TRASLADO</option>
+              <option value="VISITA">VISITA</option>
+            </select>
+          </div>
+
+          <!-- Forma de Actividad -->
+          <div class="form-group">
+            <label for="forma_actividad">Forma de Actividad *</label>
+            <select id="forma_actividad" class="form-control" required disabled>
+              <option value="">Seleccione tipo primero...</option>
+            </select>
+          </div>
+
+          <!-- Cantidad Fibra -->
+          <div class="form-group">
+            <label for="cantidad_fibra">Cantidad Fibra (metros)</label>
+            <input type="number" id="cantidad_fibra" class="form-control" placeholder="0" min="0" value="0">
+          </div>
+
+          <!-- Punto de Red -->
+          <div class="form-group">
+            <label for="tiene_punto_red">¿Punto de Red?</label>
+            <select id="tiene_punto_red" class="form-control">
+              <option value="NO">NO</option>
+              <option value="SI">SI</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="group-punto-red-cant" style="display: none;">
+            <label for="punto_red_cant">Cantidad Punto Red</label>
+            <select id="punto_red_cant" class="form-control">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+
+          <!-- AC -->
+          <div class="form-group">
+            <label for="tiene_ac">¿AC?</label>
+            <select id="tiene_ac" class="form-control">
+              <option value="NO">NO</option>
+              <option value="SI">SI</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="group-ac-cant" style="display: none;">
+            <label for="ac_cant">Cantidad AC</label>
+            <select id="ac_cant" class="form-control">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Resumen de Valores Calculados Automáticamente -->
+        <div class="summary-box">
+          <div class="summary-item">
+            <span>Cant. Actividad</span>
+            <strong id="disp_cantidad_act">1</strong>
+          </div>
+          <div class="summary-item">
+            <span>Valor Actividad</span>
+            <strong id="disp_valor_actividad">$0.00</strong>
+          </div>
+          <div class="summary-item">
+            <span>Valor Pred</span>
+            <strong id="disp_valor_pred">$0.00</strong>
+          </div>
+          <div class="summary-item">
+            <span>Valor AC</span>
+            <strong id="disp_valor_ac">$0.00</strong>
+          </div>
+          <div class="summary-item">
+            <span>Excedente (m)</span>
+            <strong id="disp_exedente">0</strong>
+          </div>
+          <div class="summary-item">
+            <span>Valor Excedente</span>
+            <strong id="disp_valor_exedente">$0.00</strong>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: right;">
+          <button type="submit" class="btn-primary" style="padding: 0.85rem 2rem;">Guardar Actividad</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="../script.js"></script>
+  <script>
+    // Lógica dinámica del formulario
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Asignar fecha actual
+      document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+
+      // 2. Cargar usuarios
+      cargarUsuariosSelect();
+
+      // 3. Event listeners para actualización de reglas
+      document.getElementById('tipo_actividad').addEventListener('change', actualizarFormaActividad);
+      document.getElementById('forma_actividad').addEventListener('change', calcularValores);
+      document.getElementById('cantidad_fibra').addEventListener('input', calcularValores);
+      
+      document.getElementById('tiene_punto_red').addEventListener('change', (e) => {
+        document.getElementById('group-punto-red-cant').style.display = e.target.value === 'SI' ? 'flex' : 'none';
+        calcularValores();
+      });
+      document.getElementById('punto_red_cant').addEventListener('change', calcularValores);
+
+      document.getElementById('tiene_ac').addEventListener('change', (e) => {
+        document.getElementById('group-ac-cant').style.display = e.target.value === 'SI' ? 'flex' : 'none';
+        calcularValores();
+      });
+      document.getElementById('ac_cant').addEventListener('change', calcularValores);
+
+      // Envío de formulario
+      document.getElementById('form-actividad-propia').addEventListener('submit', guardarActividad);
+    });
+
+    let usuariosCache = [];
+
+    async function cargarUsuariosSelect() {
+      const select = document.getElementById('id_usuario');
+      try {
+        const res = await fetch('https://actividades-fmax.vercel.app/api/usuarios');
+        usuariosCache = await res.json();
+        select.innerHTML = '<option value="">Seleccione un usuario...</option>';
+        usuariosCache.forEach(u => {
+          select.innerHTML += `<option value="${u.id}">${u.nombre} (${u.sector || 'S/N'})</option>`;
+        });
+      } catch (err) {
+        select.innerHTML = '<option value="">Error al cargar usuarios</option>';
+      }
+    }
+
+    function actualizarFormaActividad() {
+      const tipo = document.getElementById('tipo_actividad').value;
+      const selectForma = document.getElementById('forma_actividad');
+
+      selectForma.innerHTML = '';
+      selectForma.disabled = false;
+
+      if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
+        selectForma.innerHTML = `
+          <option value="NORMAL">NORMAL</option>
+          <option value="DUCTERIA">DUCTERIA</option>
+        `;
+      } else if (tipo === 'VISITA') {
+        selectForma.innerHTML = `
+          <option value="NORMAL">NORMAL</option>
+          <option value="RECABLEADO NORMAL">RECABLEADO NORMAL</option>
+          <option value="DUCTERIA">DUCTERIA</option>
+        `;
+      } else {
+        selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
+        selectForma.disabled = true;
+      }
+      calcularValores();
+    }
+
+    function calcularValores() {
+      const tipo = document.getElementById('tipo_actividad').value;
+      const forma = document.getElementById('forma_actividad').value;
+      const fibra = parseInt(document.getElementById('cantidad_fibra').value) || 0;
+
+      // 1. cantidad_act
+      const cantidad_act = forma === 'DUCTERIA' ? 2 : 1;
+
+      // 2. valor_actividad
+      let valor_actividad = 0;
+      if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
+        valor_actividad = forma === 'DUCTERIA' ? 14 : 7;
+      } else if (tipo === 'VISITA') {
+        if (forma === 'NORMAL') valor_actividad = 6;
+        else if (forma === 'RECABLEADO NORMAL') valor_actividad = 7;
+        else if (forma === 'DUCTERIA') valor_actividad = 14;
+      }
+
+      // 3. punto_red y valor_pred
+      const tienePunto = document.getElementById('tiene_punto_red').value === 'SI';
+      const punto_red = tienePunto ? parseInt(document.getElementById('punto_red_cant').value) : 0;
+      const valor_pred = punto_red * 1;
+
+      // 4. ac y valor_ac
+      const tieneAc = document.getElementById('tiene_ac').value === 'SI';
+      const ac = tieneAc ? parseInt(document.getElementById('ac_cant').value) : 0;
+      const valor_ac = ac * 1;
+
+      // 5. exedente y valor_exedente
+      const exedente = fibra > 300 ? fibra - 300 : 0;
+      const valor_exedente = exedente * 0.04;
+
+      // Renderizar interfaz
+      document.getElementById('disp_cantidad_act').textContent = cantidad_act;
+      document.getElementById('disp_valor_actividad').textContent = `$${valor_actividad.toFixed(2)}`;
+      document.getElementById('disp_valor_pred').textContent = `$${valor_pred.toFixed(2)}`;
+      document.getElementById('disp_valor_ac').textContent = `$${valor_ac.toFixed(2)}`;
+      document.getElementById('disp_exedente').textContent = exedente;
+      document.getElementById('disp_valor_exedente').textContent = `$${valor_exedente.toFixed(2)}`;
+
+      return {
+        cantidad_act, valor_actividad, punto_red, valor_pred,
+        ac, valor_ac, exedente, valor_exedente
+      };
+    }
+
+    async function guardarActividad(e) {
+      e.preventDefault();
+      const calc = calcularValores();
+
+      const usuarioSel = usuariosCache.find(u => u.id == document.getElementById('id_usuario').value);
+
+      const payload = {
+        id_usuario: parseInt(document.getElementById('id_usuario').value),
+        fecha: document.getElementById('fecha').value,
+        cuadrilla: 'PROPIA',
+        sector: usuarioSel ? usuarioSel.sector : '',
+        tipo_actividad: document.getElementById('tipo_actividad').value,
+        forma_actividad: document.getElementById('forma_actividad').value,
+        cantidad_act: calc.cantidad_act,
+        valor_actividad: calc.valor_actividad,
+        cantidad_fibra: parseInt(document.getElementById('cantidad_fibra').value) || 0,
+        punto_red: calc.punto_red,
+        valor_pred: calc.valor_pred,
+        ac: calc.ac,
+        valor_ac: calc.valor_ac,
+        exedente: calc.exedente,
+        valor_exedente: calc.valor_exedente
+      };
+
+      try {
+        const res = await fetch('https://actividades-fmax.vercel.app/api/crear-actividad', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          alert('Actividad registrada correctamente');
+          window.location.href = '../index.html';
+        } else {
+          alert('Error al guardar la actividad');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error de conexión');
+      }
+    }
+  </script>
+</body>
+</html>
