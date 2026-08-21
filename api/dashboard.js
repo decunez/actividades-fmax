@@ -41,21 +41,21 @@ export default async function handler(req, res) {
       FROM act_detalles ${whereClause}
     `, params);
 
-    // 2. Desglose Propia vs Externa
+    // 2. Desglose Propia vs Externa (Sumatoria de cantidad_act)
     const [origenData] = await connection.execute(`
       SELECT 
         CASE WHEN UPPER(cuadrilla) = 'PROPIA' THEN 'PROPIA' ELSE 'EXTERNA' END AS origen,
-        COUNT(*) AS registros,
+        COALESCE(SUM(cantidad_act), 0) AS registros,
         COALESCE(SUM(total_act), 0) AS monto
       FROM act_detalles ${whereClause}
       GROUP BY origen
     `, params);
 
-    // 3. Desglose por Tipo de Actividad
+    // 3. Desglose por Tipo de Actividad (Sumatoria de cantidad_act)
     const [tipoData] = await connection.execute(`
       SELECT 
         tipo_actividad,
-        COUNT(*) AS cantidad,
+        COALESCE(SUM(cantidad_act), 0) AS cantidad,
         COALESCE(SUM(total_act), 0) AS monto
       FROM act_detalles ${whereClause}
       GROUP BY tipo_actividad
