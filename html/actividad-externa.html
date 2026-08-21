@@ -377,12 +377,15 @@
       });
     });
 
-    function calcularTotal() {
+function calcularTotal() {
       const tipo = document.getElementById('tipo_actividad').value;
       const forma = document.getElementById('forma_actividad').value;
       const fibra = Number(document.getElementById('cantidad_fibra').value) || 0;
       const pred = Number(document.querySelector('input[name="punto_red"]:checked')?.value) || 0;
       const ac = Number(document.querySelector('input[name="ac"]:checked')?.value) || 0;
+
+      // Asigna cantidad 2 si es DUCTERIA, de lo contrario 1
+      const cantidadAct = (forma === 'DUCTERIA') ? 2 : 1;
 
       let valAct = 0;
       if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
@@ -397,6 +400,8 @@
       const valAc = ac * 5.00;
       const total = valAct + valExcedente + valPred + valAc;
 
+      // Actualizar vista previa
+      document.getElementById('sum-cant').textContent = cantidadAct;
       document.getElementById('sum-val-act').textContent = `$${valAct.toFixed(2)}`;
       document.getElementById('sum-excedente').textContent = `${excedente} m`;
       document.getElementById('sum-val-excedente').textContent = `$${valExcedente.toFixed(2)}`;
