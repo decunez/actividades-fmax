@@ -17,7 +17,7 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 1rem;
       align-items: end;
     }
@@ -41,7 +41,7 @@
       color: var(--text-main);
       border-radius: 6px;
       outline: none;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
 
     .form-control:focus {
@@ -50,12 +50,12 @@
 
     .filter-actions {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
@@ -167,13 +167,18 @@
           <label for="periodo">Período Facturación (2026)</label>
           <select id="periodo" class="form-control">
             <option value="">TODOS LOS PERÍODOS</option>
-            <option value="2026-05-25|2026-06-26">Jun (25 May - 26 Jun)</option>
-            <option value="2026-06-25|2026-07-26">Jul (25 Jun - 26 Jul)</option>
-            <option value="2026-07-25|2026-08-26">Ago (25 Jul - 26 Ago)</option>
-            <option value="2026-08-25|2026-09-26">Sep (25 Ago - 26 Sep)</option>
-            <option value="2026-09-25|2026-10-26">Oct (25 Sep - 26 Oct)</option>
-            <option value="2026-10-25|2026-11-26">Nov (25 Oct - 26 Nov)</option>
-            <option value="2026-11-25|2026-12-26">Dic (25 Nov - 26 Dic)</option>
+            <option value="2025-12-25|2026-01-26">Ene (25 Dic 2025 - 26 Ene 2026)</option>
+            <option value="2026-01-25|2026-02-26">Feb (25 Ene 2026 - 26 Feb 2026)</option>
+            <option value="2026-02-25|2026-03-26">Mar (25 Feb 2026 - 26 Mar 2026)</option>
+            <option value="2026-03-25|2026-04-26">Abr (25 Mar 2026 - 26 Abr 2026)</option>
+            <option value="2026-04-25|2026-05-26">May (25 Abr 2026 - 26 May 2026)</option>
+            <option value="2026-05-25|2026-06-26">Jun (25 May 2026 - 26 Jun 2026)</option>
+            <option value="2026-06-25|2026-07-26">Jul (25 Jun 2026 - 26 Jul 2026)</option>
+            <option value="2026-07-25|2026-08-26" selected>Ago (25 Jul 2026 - 26 Ago 2026)</option>
+            <option value="2026-08-25|2026-09-26">Sep (25 Ago 2026 - 26 Sep 2026)</option>
+            <option value="2026-09-25|2026-10-26">Oct (25 Sep 2026 - 26 Oct 2026)</option>
+            <option value="2026-10-25|2026-11-26">Nov (25 Oct 2026 - 26 Nov 2026)</option>
+            <option value="2026-11-25|2026-12-26">Dic (25 Nov 2026 - 26 Dic 2026)</option>
           </select>
         </div>
 
@@ -187,14 +192,21 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label for="sector">Sector</label>
+          <select id="sector" class="form-control">
+            <option value="TODOS">TODOS LOS SECTORES</option>
+          </select>
+        </div>
+
         <div class="filter-actions">
-          <button type="submit" class="btn-primary" style="padding: 0.75rem 1.25rem;">Filtrar</button>
-          <button type="button" id="btn-limpiar" class="btn-secondary" style="padding: 0.75rem 1.25rem;">Limpiar</button>
+          <button type="submit" class="btn-primary" style="padding: 0.75rem 1rem;">Filtrar</button>
+          <button type="button" id="btn-limpiar" class="btn-secondary" style="padding: 0.75rem 1rem;">Limpiar</button>
         </div>
       </form>
     </div>
 
-<!-- Resumen / Detalle Bar -->
+    <!-- KPIs Resumen -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <span>Total Registros</span>
@@ -225,7 +237,7 @@
       </div>
     </div>
 
-    <!-- Tabla sin Columna Usuario -->
+    <!-- Tabla de resultados -->
     <div class="table-container">
       <table>
         <thead>
@@ -251,8 +263,10 @@
 
   <script src="../script.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Limpiar un campo al interactuar con el otro para evitar conflictos
+    const API_BASE = 'https://actividades-fmax.vercel.app/api/actividades';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Limpiar un selector al usar el otro
       document.getElementById('fecha').addEventListener('change', () => {
         if (document.getElementById('fecha').value) {
           document.getElementById('periodo').value = '';
@@ -265,6 +279,8 @@
         }
       });
 
+      // Cargar lista dinámica de sectores y luego consultar actividades iniciales
+      await cargarSectores();
       cargarActividades();
 
       document.getElementById('form-filtros').addEventListener('submit', (e) => {
@@ -274,16 +290,39 @@
 
       document.getElementById('btn-limpiar').addEventListener('click', () => {
         document.getElementById('fecha').value = '';
-        document.getElementById('periodo').value = '';
+        document.getElementById('periodo').value = '2026-07-25|2026-08-26'; // Período por defecto
         document.getElementById('tipo_actividad').value = 'TODOS';
+        document.getElementById('sector').value = 'TODOS';
         cargarActividades();
       });
     });
+
+    async function cargarSectores() {
+      try {
+        const res = await fetch(`${API_BASE}?obtener_sectores=true`);
+        const sectores = await res.json();
+        
+        const selectSector = document.getElementById('sector');
+        selectSector.innerHTML = '<option value="TODOS">TODOS LOS SECTORES</option>';
+
+        if (Array.isArray(sectores)) {
+          sectores.forEach(sec => {
+            const option = document.createElement('option');
+            option.value = sec;
+            option.textContent = sec;
+            selectSector.appendChild(option);
+          });
+        }
+      } catch (e) {
+        console.error("Error al cargar sectores:", e);
+      }
+    }
 
     async function cargarActividades() {
       const fecha = document.getElementById('fecha').value;
       const periodo = document.getElementById('periodo').value;
       const tipo = document.getElementById('tipo_actividad').value;
+      const sector = document.getElementById('sector').value;
 
       const params = new URLSearchParams();
 
@@ -299,11 +338,15 @@
         params.append('tipo_actividad', tipo);
       }
 
+      if (sector && sector !== 'TODOS') {
+        params.append('sector', sector);
+      }
+
       const tbody = document.getElementById('tabla-body');
       tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Cargando...</td></tr>';
 
       try {
-        const res = await fetch(`https://actividades-fmax.vercel.app/api/actividades?${params.toString()}`);
+        const res = await fetch(`${API_BASE}?${params.toString()}`);
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -313,6 +356,7 @@
         }
 
         let sumaMonto = 0;
+        let totalCantAct = 0;
         let cantExcedente = 0, valExcedente = 0;
         let cantPtRed = 0, valPtRed = 0;
         let cantAC = 0, valAC = 0;
@@ -323,7 +367,10 @@
           const totalNum = parseFloat(item.total_act) || 0;
           sumaMonto += totalNum;
 
-          // Acumuladores de detalles
+          const cantParsed = parseInt(item.cantidad_act, 10);
+          const cantAct = (!isNaN(cantParsed) && cantParsed > 0) ? cantParsed : 1;
+          totalCantAct += cantAct;
+
           cantExcedente += parseInt(item.exedente) || 0;
           valExcedente += parseFloat(item.valor_exedente) || 0;
 
@@ -354,8 +401,8 @@
           `;
         });
 
-        // Actualizar KPIs
         document.getElementById('kpi-registros').textContent = data.length;
+        document.getElementById('kpi-cant-act').textContent = totalCantAct;
         document.getElementById('kpi-monto').textContent = `$${sumaMonto.toFixed(2)}`;
         document.getElementById('kpi-excedente-cant').textContent = `${cantExcedente} m`;
         document.getElementById('kpi-excedente-val').textContent = `$${valExcedente.toFixed(2)}`;
@@ -373,6 +420,7 @@
 
     function resetearKPIs() {
       document.getElementById('kpi-registros').textContent = '0';
+      document.getElementById('kpi-cant-act').textContent = '0';
       document.getElementById('kpi-monto').textContent = '$0.00';
       document.getElementById('kpi-excedente-cant').textContent = '0 m';
       document.getElementById('kpi-excedente-val').textContent = '$0.00';
