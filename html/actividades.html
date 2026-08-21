@@ -167,18 +167,13 @@
           <label for="periodo">Período Facturación (2026)</label>
           <select id="periodo" class="form-control">
             <option value="">TODOS LOS PERÍODOS</option>
-            <option value="2025-12-25|2026-01-26">Ene (25 Dic 2025 - 26 Ene 2026)</option>
-            <option value="2026-01-25|2026-02-26">Feb (25 Ene 2026 - 26 Feb 2026)</option>
-            <option value="2026-02-25|2026-03-26">Mar (25 Feb 2026 - 26 Mar 2026)</option>
-            <option value="2026-03-25|2026-04-26">Abr (25 Mar 2026 - 26 Abr 2026)</option>
-            <option value="2026-04-25|2026-05-26">May (25 Abr 2026 - 26 May 2026)</option>
-            <option value="2026-05-25|2026-06-26">Jun (25 May 2026 - 26 Jun 2026)</option>
-            <option value="2026-06-25|2026-07-26">Jul (25 Jun 2026 - 26 Jul 2026)</option>
-            <option value="2026-07-25|2026-08-26">Ago (25 Jul 2026 - 26 Ago 2026)</option>
-            <option value="2026-08-25|2026-09-26">Sep (25 Ago 2026 - 26 Sep 2026)</option>
-            <option value="2026-09-25|2026-10-26">Oct (25 Sep 2026 - 26 Oct 2026)</option>
-            <option value="2026-10-25|2026-11-26">Nov (25 Oct 2026 - 26 Nov 2026)</option>
-            <option value="2026-11-25|2026-12-26">Dic (25 Nov 2026 - 26 Dic 2026)</option>
+            <option value="2026-05-25|2026-06-26">Jun (25 May - 26 Jun)</option>
+            <option value="2026-06-25|2026-07-26">Jul (25 Jun - 26 Jul)</option>
+            <option value="2026-07-25|2026-08-26">Ago (25 Jul - 26 Ago)</option>
+            <option value="2026-08-25|2026-09-26">Sep (25 Ago - 26 Sep)</option>
+            <option value="2026-09-25|2026-10-26">Oct (25 Sep - 26 Oct)</option>
+            <option value="2026-10-25|2026-11-26">Nov (25 Oct - 26 Nov)</option>
+            <option value="2026-11-25|2026-12-26">Dic (25 Nov - 26 Dic)</option>
           </select>
         </div>
 
@@ -199,11 +194,15 @@
       </form>
     </div>
 
-    <!-- Resumen / Detalle Bar -->
+<!-- Resumen / Detalle Bar -->
     <div class="kpi-grid">
       <div class="kpi-card">
         <span>Total Registros</span>
         <strong id="kpi-registros">0</strong>
+      </div>
+      <div class="kpi-card">
+        <span>Total Actividades</span>
+        <strong id="kpi-cant-act" style="color: #60a5fa;">0</strong>
       </div>
       <div class="kpi-card">
         <span>Monto Total</span>
