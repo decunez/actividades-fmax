@@ -9,9 +9,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
   const {
-    id_usuario, fecha, cuadrilla, sector, tipo_actividad,
+    id_usuario, cliente, fecha, cuadrilla, sector, tipo_actividad,
     forma_actividad, cantidad_act, valor_actividad, cantidad_fibra,
-    punto_red, valor_pred, ac, valor_ac, exedente, valor_exedente
+    punto_red, valor_pred, ac, valor_ac, exedente, valor_exedente, total_act
   } = req.body;
 
   if (!id_usuario || !fecha || !tipo_actividad) {
@@ -30,14 +30,14 @@ export default async function handler(req, res) {
 
     const [result] = await connection.execute(
       `INSERT INTO act_detalles (
-        id_usuario, fecha, cuadrilla, sector, tipo_actividad, forma_actividad,
+        id_usuario, cliente, fecha, cuadrilla, sector, tipo_actividad, forma_actividad,
         cantidad_act, valor_actividad, cantidad_fibra, punto_red, valor_pred,
-        ac, valor_ac, exedente, valor_exedente
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ac, valor_ac, exedente, valor_exedente, total_act
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        id_usuario, fecha, cuadrilla || 'PROPIA', sector || '', tipo_actividad,
+        id_usuario, cliente || '', fecha, cuadrilla || 'PROPIA', sector || '', tipo_actividad,
         forma_actividad, cantidad_act, valor_actividad, cantidad_fibra || 0,
-        punto_red, valor_pred, ac, valor_ac, exedente, valor_exedente
+        punto_red, valor_pred, ac, valor_ac, exedente, valor_exedente, total_act || 0.00
       ]
     );
 

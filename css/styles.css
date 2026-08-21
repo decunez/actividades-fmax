@@ -215,3 +215,15 @@ footer {
   background-color: rgba(255, 255, 255, 0.05);
   border-color: var(--accent);
 }
+
+/* Ajuste unificado para botones y enlaces */
+.btn-primary, .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  box-sizing: border-box;
+}
