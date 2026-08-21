@@ -1,18 +1,12 @@
 import mysql from 'mysql2/promise';
 
 export default async function handler(req, res) {
-  // Cabeceras CORS obligatorias al inicio
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Método no permitido' });
 
   try {
     const connection = await mysql.createConnection({
@@ -24,7 +18,7 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-    const { fecha_inicio, fecha_fin, tipo_actividad } = req.query;
+    const { fecha, fecha_inicio, fecha_fin, tipo_actividad } = req.query;
 
     let query = `
       SELECT a.*, u.nombre AS nombre_usuario 
@@ -34,14 +28,20 @@ export default async function handler(req, res) {
     `;
     const params = [];
 
-    if (fecha_inicio) {
-      query += ` AND DATE(a.fecha) >= ?`;
-      params.push(fecha_inicio);
-    }
-
-    if (fecha_fin) {
-      query += ` AND DATE(a.fecha) <= ?`;
-      params.push(fecha_fin);
+    // Filtro por fecha individual
+    if (fecha) {
+      query += ` AND DATE(a.fecha) = ?`;
+      params.push(fecha);
+    } else {
+      // Filtro por rango (Períodos de Facturación)
+      if (fecha_inicio) {
+        query += ` AND DATE(a.fecha) >= ?`;
+        params.push(fecha_inicio);
+      }
+      if (fecha_fin) {
+        query += ` AND DATE(a.fecha) <= ?`;
+        params.push(fecha_fin);
+      }
     }
 
     if (tipo_actividad && tipo_actividad !== 'TODOS') {
@@ -56,7 +56,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json(rows);
   } catch (error) {
-    console.error('Error en API actividades:', error);
     return res.status(500).json({ error: error.message });
   }
 }

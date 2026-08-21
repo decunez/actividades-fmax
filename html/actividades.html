@@ -17,7 +17,7 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
       align-items: end;
     }
@@ -51,6 +51,39 @@
     .filter-actions {
       display: flex;
       gap: 0.75rem;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .kpi-card span {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .kpi-card strong {
+      font-size: 1.25rem;
+      color: var(--text-main);
+    }
+
+    .kpi-card small {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-top: 0.2rem;
     }
 
     .table-container {
@@ -99,31 +132,6 @@
     .badge-instalacion { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
     .badge-traslado { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
     .badge-visita { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-
-    .kpi-bar {
-      display: flex;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .kpi-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.5rem;
-      flex: 1;
-    }
-
-    .kpi-card span {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .kpi-card strong {
-      font-size: 1.5rem;
-      color: #10b981;
-    }
   </style>
 </head>
 <body>
@@ -151,13 +159,27 @@
     <div class="filter-card">
       <form id="form-filtros" class="filter-grid">
         <div class="form-group">
-          <label for="fecha_inicio">Fecha Desde</label>
-          <input type="date" id="fecha_inicio" class="form-control">
+          <label for="fecha">Fecha Exacta</label>
+          <input type="date" id="fecha" class="form-control">
         </div>
 
         <div class="form-group">
-          <label for="fecha_fin">Fecha Hasta</label>
-          <input type="date" id="fecha_fin" class="form-control">
+          <label for="periodo">Período Facturación (2026)</label>
+          <select id="periodo" class="form-control">
+            <option value="">TODOS LOS PERÍODOS</option>
+            <option value="2025-12-25|2026-01-26">Ene (25 Dic 2025 - 26 Ene 2026)</option>
+            <option value="2026-01-25|2026-02-26">Feb (25 Ene 2026 - 26 Feb 2026)</option>
+            <option value="2026-02-25|2026-03-26">Mar (25 Feb 2026 - 26 Mar 2026)</option>
+            <option value="2026-03-25|2026-04-26">Abr (25 Mar 2026 - 26 Abr 2026)</option>
+            <option value="2026-04-25|2026-05-26">May (25 Abr 2026 - 26 May 2026)</option>
+            <option value="2026-05-25|2026-06-26">Jun (25 May 2026 - 26 Jun 2026)</option>
+            <option value="2026-06-25|2026-07-26">Jul (25 Jun 2026 - 26 Jul 2026)</option>
+            <option value="2026-07-25|2026-08-26">Ago (25 Jul 2026 - 26 Ago 2026)</option>
+            <option value="2026-08-25|2026-09-26">Sep (25 Ago 2026 - 26 Sep 2026)</option>
+            <option value="2026-09-25|2026-10-26">Oct (25 Sep 2026 - 26 Oct 2026)</option>
+            <option value="2026-10-25|2026-11-26">Nov (25 Oct 2026 - 26 Nov 2026)</option>
+            <option value="2026-11-25|2026-12-26">Dic (25 Nov 2026 - 26 Dic 2026)</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -177,25 +199,39 @@
       </form>
     </div>
 
-    <!-- Indicadores -->
-    <div class="kpi-bar">
+    <!-- Resumen / Detalle Bar -->
+    <div class="kpi-grid">
       <div class="kpi-card">
         <span>Total Registros</span>
-        <strong id="kpi-total-registros" style="color: var(--text-main);">0</strong>
+        <strong id="kpi-registros">0</strong>
       </div>
       <div class="kpi-card">
         <span>Monto Total</span>
-        <strong id="kpi-monto-total">$0.00</strong>
+        <strong id="kpi-monto" style="color: #10b981;">$0.00</strong>
+      </div>
+      <div class="kpi-card">
+        <span>Excedente (m)</span>
+        <strong id="kpi-excedente-cant">0 m</strong>
+        <small id="kpi-excedente-val">$0.00</small>
+      </div>
+      <div class="kpi-card">
+        <span>Puntos de Red</span>
+        <strong id="kpi-ptred-cant">0</strong>
+        <small id="kpi-ptred-val">$0.00</small>
+      </div>
+      <div class="kpi-card">
+        <span>Equipos AC</span>
+        <strong id="kpi-ac-cant">0</strong>
+        <small id="kpi-ac-val">$0.00</small>
       </div>
     </div>
 
-    <!-- Tabla -->
+    <!-- Tabla sin Columna Usuario -->
     <div class="table-container">
       <table>
         <thead>
           <tr>
             <th>Fecha</th>
-            <th>Usuario</th>
             <th>Cliente</th>
             <th>Tipo</th>
             <th>Forma</th>
@@ -207,7 +243,7 @@
         </thead>
         <tbody id="tabla-body">
           <tr>
-            <td colspan="9" style="text-align: center; color: var(--text-muted);">Cargando registros...</td>
+            <td colspan="8" style="text-align: center; color: var(--text-muted);">Cargando registros...</td>
           </tr>
         </tbody>
       </table>
@@ -217,6 +253,19 @@
   <script src="../script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Limpiar un campo al interactuar con el otro para evitar conflictos
+      document.getElementById('fecha').addEventListener('change', () => {
+        if (document.getElementById('fecha').value) {
+          document.getElementById('periodo').value = '';
+        }
+      });
+
+      document.getElementById('periodo').addEventListener('change', () => {
+        if (document.getElementById('periodo').value) {
+          document.getElementById('fecha').value = '';
+        }
+      });
+
       cargarActividades();
 
       document.getElementById('form-filtros').addEventListener('submit', (e) => {
@@ -225,43 +274,65 @@
       });
 
       document.getElementById('btn-limpiar').addEventListener('click', () => {
-        document.getElementById('fecha_inicio').value = '';
-        document.getElementById('fecha_fin').value = '';
+        document.getElementById('fecha').value = '';
+        document.getElementById('periodo').value = '';
         document.getElementById('tipo_actividad').value = 'TODOS';
         cargarActividades();
       });
     });
 
     async function cargarActividades() {
-      const fechaInicio = document.getElementById('fecha_inicio').value;
-      const fechaFin = document.getElementById('fecha_fin').value;
+      const fecha = document.getElementById('fecha').value;
+      const periodo = document.getElementById('periodo').value;
       const tipo = document.getElementById('tipo_actividad').value;
 
       const params = new URLSearchParams();
-      if (fechaInicio) params.append('fecha_inicio', fechaInicio);
-      if (fechaFin) params.append('fecha_fin', fechaFin);
-      if (tipo && tipo !== 'TODOS') params.append('tipo_actividad', tipo);
+
+      if (fecha) {
+        params.append('fecha', fecha);
+      } else if (periodo) {
+        const [fInicio, fFin] = periodo.split('|');
+        params.append('fecha_inicio', fInicio);
+        params.append('fecha_fin', fFin);
+      }
+
+      if (tipo && tipo !== 'TODOS') {
+        params.append('tipo_actividad', tipo);
+      }
 
       const tbody = document.getElementById('tabla-body');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Cargando...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Cargando...</td></tr>';
 
       try {
         const res = await fetch(`https://actividades-fmax.vercel.app/api/actividades?${params.toString()}`);
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
-          document.getElementById('kpi-total-registros').textContent = '0';
-          document.getElementById('kpi-monto-total').textContent = '$0.00';
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
+          resetearKPIs();
           return;
         }
 
-        let sumaTotal = 0;
+        let sumaMonto = 0;
+        let cantExcedente = 0, valExcedente = 0;
+        let cantPtRed = 0, valPtRed = 0;
+        let cantAC = 0, valAC = 0;
+
         tbody.innerHTML = '';
 
         data.forEach(item => {
           const totalNum = parseFloat(item.total_act) || 0;
-          sumaTotal += totalNum;
+          sumaMonto += totalNum;
+
+          // Acumuladores de detalles
+          cantExcedente += parseInt(item.exedente) || 0;
+          valExcedente += parseFloat(item.valor_exedente) || 0;
+
+          cantPtRed += parseInt(item.punto_red) || 0;
+          valPtRed += parseFloat(item.valor_pred) || 0;
+
+          cantAC += parseInt(item.ac) || 0;
+          valAC += parseFloat(item.valor_ac) || 0;
 
           const fechaFormateada = item.fecha ? item.fecha.toString().substring(0, 10) : '-';
           
@@ -273,7 +344,6 @@
           tbody.innerHTML += `
             <tr>
               <td>${fechaFormateada}</td>
-              <td>${item.nombre_usuario || 'ID ' + item.id_usuario}</td>
               <td>${item.cliente || 'NO DEFINIDO'}</td>
               <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
               <td>${item.forma_actividad}</td>
@@ -285,13 +355,32 @@
           `;
         });
 
-        document.getElementById('kpi-total-registros').textContent = data.length;
-        document.getElementById('kpi-monto-total').textContent = `$${sumaTotal.toFixed(2)}`;
+        // Actualizar KPIs
+        document.getElementById('kpi-registros').textContent = data.length;
+        document.getElementById('kpi-monto').textContent = `$${sumaMonto.toFixed(2)}`;
+        document.getElementById('kpi-excedente-cant').textContent = `${cantExcedente} m`;
+        document.getElementById('kpi-excedente-val').textContent = `$${valExcedente.toFixed(2)}`;
+        document.getElementById('kpi-ptred-cant').textContent = cantPtRed;
+        document.getElementById('kpi-ptred-val').textContent = `$${valPtRed.toFixed(2)}`;
+        document.getElementById('kpi-ac-cant').textContent = cantAC;
+        document.getElementById('kpi-ac-val').textContent = `$${valAC.toFixed(2)}`;
 
       } catch (err) {
         console.error(err);
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
+        resetearKPIs();
       }
+    }
+
+    function resetearKPIs() {
+      document.getElementById('kpi-registros').textContent = '0';
+      document.getElementById('kpi-monto').textContent = '$0.00';
+      document.getElementById('kpi-excedente-cant').textContent = '0 m';
+      document.getElementById('kpi-excedente-val').textContent = '$0.00';
+      document.getElementById('kpi-ptred-cant').textContent = '0';
+      document.getElementById('kpi-ptred-val').textContent = '$0.00';
+      document.getElementById('kpi-ac-cant').textContent = '0';
+      document.getElementById('kpi-ac-val').textContent = '$0.00';
     }
   </script>
 </body>
