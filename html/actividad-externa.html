@@ -380,22 +380,29 @@
 
 function calcularTotal() {
       const tipo = document.getElementById('tipo_actividad').value;
-      const forma = document.getElementById('forma_actividad').value;
+      //const forma = document.getElementById('forma_actividad').value;
       const fibra = Number(document.getElementById('cantidad_fibra').value) || 0;
       const pred = Number(document.querySelector('input[name="punto_red"]:checked')?.value) || 0;
       const ac = Number(document.querySelector('input[name="ac"]:checked')?.value) || 0;
 
       // Asignación basada en la forma de la actividad
-let cantidadAct = 1;
-let valAct = 6.00; // Valor por defecto (NORMAL)
+// Obtener el valor seleccionado limpia de espacios
+const forma = (document.getElementById('forma_actividad')?.value || '').trim().toUpperCase();
 
+let cantidadAct = 1;
+let valAct = 6.00;
+
+// Asignación de tarifas
 if (forma.includes('DUCTERIA')) {
   cantidadAct = 2;
   valAct = 14.00;
-} else if (forma === 'RECABLEADO') {
+} else if (forma.includes('RECABLEADO')) {
   cantidadAct = 1;
   valAct = 7.00;
-}0;
+} else {
+  cantidadAct = 1;
+  valAct = 6.00;
+}
 
       const excedente = fibra > 300 ? fibra - 300 : 0;
       const valExcedente = excedente * 0.04;

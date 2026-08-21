@@ -31,12 +31,26 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-    // Lógica de cálculo simplificada basada en la forma de actividad
-    const cantidad_act = (forma_actividad === 'DUCTERIA') ? 2 : 1;
-    const valor_actividad = (forma_actividad === 'DUCTERIA') ? 14.00 : 7.00;
+    // Normalizar la cadena para comparación segura
+    const formaUpper = (forma_actividad || '').toUpperCase().trim();
+
+    let cantidad_act = 1;
+    let valor_actividad = 6.00;
+
+    // Lógica dinámica según la Forma de Actividad
+    if (formaUpper.includes('DUCTERIA') || formaUpper.includes('SOTERRADO')) {
+      cantidad_act = 2;
+      valor_actividad = 14.00;
+    } else if (formaUpper.includes('RECABLEADO')) {
+      cantidad_act = 1;
+      valor_actividad = 7.00;
+    } else {
+      cantidad_act = 1;
+      valor_actividad = 6.00;
+    }
 
     const fibraNum = Number(cantidad_fibra) || 0;
-    const exedente = fibraNum > 200 ? fibraNum - 200 : 0;
+    const exedente = fibraNum > 300 ? fibraNum - 300 : 0;
     const valor_exedente = exedente * 0.04;
 
     const predNum = Number(punto_red) || 0;
