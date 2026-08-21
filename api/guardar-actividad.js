@@ -31,15 +31,9 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-// Lógica de cálculo de valores
+    // Lógica de cálculo simplificada basada en la forma de actividad
     const cantidad_act = (forma_actividad === 'DUCTERIA') ? 2 : 1;
-    let valor_actividad = 0;
-    
-    if (tipo_actividad === 'INSTALACION' || tipo_actividad === 'TRASLADO') {
-      valor_actividad = (forma_actividad === 'DUCTERIA') ? 14.00 : 7.00;
-    } else if (tipo_actividad === 'VISITA') {
-      valor_actividad = 14.00;
-    }
+    const valor_actividad = (forma_actividad === 'DUCTERIA') ? 14.00 : 7.00;
 
     const fibraNum = Number(cantidad_fibra) || 0;
     const exedente = fibraNum > 200 ? fibraNum - 200 : 0;

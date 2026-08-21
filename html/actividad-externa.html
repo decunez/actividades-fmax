@@ -384,15 +384,9 @@ function calcularTotal() {
       const pred = Number(document.querySelector('input[name="punto_red"]:checked')?.value) || 0;
       const ac = Number(document.querySelector('input[name="ac"]:checked')?.value) || 0;
 
-      // Asigna cantidad 2 si es DUCTERIA, de lo contrario 1
+      // Asignación basada en la forma de la actividad
       const cantidadAct = (forma === 'DUCTERIA') ? 2 : 1;
-
-      let valAct = 0;
-      if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
-        valAct = (forma === 'DUCTERIA') ? 14.00 : 7.00;
-      } else if (tipo === 'VISITA') {
-        valAct = 14.00;
-      }
+      const valAct = (forma === 'DUCTERIA') ? 14.00 : 7.00;
 
       const excedente = fibra > 200 ? fibra - 200 : 0;
       const valExcedente = excedente * 0.04;
