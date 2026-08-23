@@ -3,7 +3,7 @@
    ========================================== */
 :root {
   --bg-primary: #0b0f19;
-  --bg-surface: #151c2c;
+  --bg-surface: #0b0f19;
   --border: #232d42;
   --radius: 8px;
   --text-main: #f3f4f6;
@@ -330,57 +330,130 @@ body.generating-pdf td {
 }
 
 /* ==========================================
-   ADAPTACIÓN RESPONSIVA PARA MÓVILES
+   NAVBAR RESPONSIVO Y MENÚ HAMBURGUESA
    ========================================== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: var(--bg-surface, #151c2c);
+  border-bottom: 1px solid var(--border, #232d42);
+  position: relative;
+}
 
+.nav-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-brand .logo {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.nav-brand .user-name {
+  font-size: 0.85rem;
+  color: var(--accent, #6366f1);
+  font-weight: 600;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-muted, #9ca3af);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #ffffff;
+}
+
+.menu-toggle {
+  display: none; /* Oculto en computadoras */
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+/* Modo Móvil */
 @media (max-width: 768px) {
-  /* 1. Corrección del Navbar */
-  .navbar {
-    flex-direction: column !alignment;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 1rem;
+  .menu-toggle {
+    display: block; /* Muestra el icono ☰ en celular */
   }
 
-  .navbar-menu,
   .nav-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    width: 100%;
-  }
-
-  /* 2. Corrección del Encabezado de Página */
-  .header-container,
-  .page-header,
-  .header-section {
-    display: flex;
+    display: none; /* Se oculta por defecto */
     flex-direction: column;
-    align-items: stretch;
+    width: 100%;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--bg-surface, #151c2c);
+    border-bottom: 1px solid var(--border, #232d42);
+    padding: 1rem;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
     gap: 1rem;
+    align-items: flex-start;
   }
 
-  /* 3. Corrección del Contenedor de Botones (PDF, Propia, Externa) */
-  .header-actions {
+  /* Clase que activa el desplegable al presionar ☰ */
+  .nav-links.active {
+    display: flex;
+  }
+}
+
+/* ==========================================
+   CORRECCIÓN DE BOTONES EN MÓVIL
+   ========================================== */
+@media (max-width: 768px) {
+  /* Envoltorio principal del título y botones */
+  .page-header, 
+  .header-container,
+  .main-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+  }
+
+  /* Contenedor de los 3 botones */
+  .header-actions,
+  .actions {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
-    gap: 0.5rem !important;
-    margin-top: 0.5rem;
+    gap: 0.75rem !important;
+    margin-top: 0.5rem !important;
   }
 
-  /* 4. Los botones se ajustan al 100% del ancho */
+  /* Reset y ajuste al 100% de cada botón */
   .header-actions button,
   .header-actions a,
   .btn-pdf,
   .btn-primary,
   .btn-secondary {
     width: 100% !important;
+    max-width: 100% !important;
+    min-height: 44px !important;
     box-sizing: border-box !important;
     display: flex !important;
-    justify-content: center !important;
     align-items: center !important;
+    justify-content: center !important;
     text-align: center !important;
     margin: 0 !important;
+    white-space: nowrap !important;
   }
 }
