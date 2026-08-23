@@ -1,0 +1,144 @@
+/* ==========================================
+   FORMULARIOS Y RESUMEN DE ACTIVIDADES (FMAX)
+   ========================================== */
+
+/* Tarjeta Contenedora Principal */
+.form-card {
+  background-color: var(--bg-surface, #151c2c);
+  border: 1px solid var(--border, #232d42);
+  border-radius: var(--radius, 8px);
+  padding: 2rem;
+  max-width: 850px;
+  margin: 1.5rem auto 2rem auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Rejilla de Formulario a 2 Columnas */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted, #9ca3af);
+  font-weight: 600;
+}
+
+/* Campos de Texto, Fechas y Selects */
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-primary, #0b0f19);
+  border: 1px solid var(--border, #232d42);
+  color: var(--text-main, #f3f4f6);
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  color-scheme: dark;
+  transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--accent, #6366f1);
+}
+
+.form-control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Radio Buttons (.radio-container y .radio-group) */
+.radio-container,
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: 44px;
+}
+
+.radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-main, #f3f4f6);
+}
+
+.radio-label input[type="radio"] {
+  accent-color: var(--accent, #6366f1);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Tarjeta de Resumen en Horizontal */
+.summary-box,
+.summary-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border, #232d42);
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+  gap: 0.75rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.summary-item span {
+  font-size: 0.72rem;
+  color: var(--text-muted, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.summary-item strong {
+  font-size: 1.1rem;
+  color: var(--text-main, #f3f4f6);
+}
+
+/* Destacar Totales */
+.summary-item.total-box strong,
+.summary-item.total strong {
+  color: var(--success, #10b981);
+  font-size: 1.35rem;
+}
+
+/* Botones de Acción */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}

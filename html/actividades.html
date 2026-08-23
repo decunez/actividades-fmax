@@ -3,136 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Listado de Actividades - Sistema FMAX</title>
+  <title>Listado de Actividades</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Librería para convertir HTML a PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link rel="stylesheet" href="../css/styles.css">
-  <style>
-    .filter-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 1rem;
-      align-items: end;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .form-control {
-      padding: 0.75rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      border-radius: 6px;
-      outline: none;
-      font-size: 0.9rem;
-    }
-
-    .form-control:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .form-control:focus:not(:disabled) {
-      border-color: var(--accent);
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .kpi-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem;
-    }
-
-    .kpi-card span {
-      display: block;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-bottom: 0.25rem;
-    }
-
-    .kpi-card strong {
-      font-size: 1.25rem;
-      color: var(--text-main);
-    }
-
-    .kpi-card small {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--accent);
-      margin-top: 0.2rem;
-    }
-
-    .table-container {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-
-    th, td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    th {
-      background-color: rgba(255, 255, 255, 0.03);
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.5px;
-    }
-
-    tr:hover {
-      background-color: rgba(255, 255, 255, 0.02);
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: var(--border);
-      color: var(--text-main);
-    }
-
-    .badge-instalacion { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-    .badge-traslado { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-    .badge-visita { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-  </style>
+  <link rel="stylesheet" href="../css/actividades.css">
 </head>
 <body>
 
@@ -141,10 +17,9 @@
     <button class="menu-toggle" id="menuToggle">☰</button>
     <ul class="nav-links" id="navLinks">
       <li><a href="../index.html" class="active">Inicio</a></li>
-      <li><a href="usuarios.html">Usuarios</a></li>
       <li><a href="actividades.html">Actividades</a></li>
       <li><a href="reportes.html">Reportes</a></li>
-      <li><a href="configuracion.html">Configuración</a></li>
+      <li><a href="usuarios.html">Configuracion</a></li>
     </ul>
   </nav>
 
@@ -154,6 +29,14 @@
         <h1>Listado de Actividades</h1>
         <p style="color: var(--text-muted);">Consulta y filtrado de registros</p>
       </div>
+
+<div class="header-actions">
+  <button onclick="generarReportePDF()" class="btn-pdf">
+    📄 Exportar PDF
+  </button>
+  <a href="actividad-propia.html" class="btn-primary">+ Actividad Propia</a>
+  <a href="actividad-externa.html" class="btn-secondary">+ Actividad Externa</a>
+</div>
     </section>
 
     <!-- Filtros -->
@@ -163,13 +46,6 @@
           <label for="periodo">1. Seleccionar Período (2026)</label>
           <select id="periodo" class="form-control">
             <option value="">-- SELECCIONE PERÍODO --</option>
-            <option value="2025-12-25|2026-01-26">Ene (25 Dic 2025 - 26 Ene 2026)</option>
-            <option value="2026-01-25|2026-02-26">Feb (25 Ene 2026 - 26 Feb 2026)</option>
-            <option value="2026-02-25|2026-03-26">Mar (25 Feb 2026 - 26 Mar 2026)</option>
-            <option value="2026-03-25|2026-04-26">Abr (25 Mar 2026 - 26 Abr 2026)</option>
-            <option value="2026-04-25|2026-05-26">May (25 Abr 2026 - 26 May 2026)</option>
-            <option value="2026-05-25|2026-06-26">Jun (25 May 2026 - 26 Jun 2026)</option>
-            <option value="2026-06-25|2026-07-26">Jul (25 Jun 2026 - 26 Jul 2026)</option>
             <option value="2026-07-25|2026-08-26" selected>Ago (25 Jul 2026 - 26 Ago 2026)</option>
             <option value="2026-08-25|2026-09-26">Sep (25 Ago 2026 - 26 Sep 2026)</option>
             <option value="2026-09-25|2026-10-26">Oct (25 Sep 2026 - 26 Oct 2026)</option>
@@ -177,7 +53,14 @@
             <option value="2026-11-25|2026-12-26">Dic (25 Nov 2026 - 26 Dic 2026)</option>
           </select>
         </div>
+        <div>
+          <button type="button" id="btn-limpiar" class="btn-secondary" style="width: 100%; padding: 0.75rem;">Limpiar Filtros</button>
+        </div>
+      </div>
+    </div>
 
+    <div class="filter-card">
+      <div class="filter-grid">
         <div class="form-group">
           <label for="fecha">Fecha Exacta</label>
           <input type="date" id="fecha" class="form-control">
@@ -216,9 +99,7 @@
           </select>
         </div>
 
-        <div>
-          <button type="button" id="btn-limpiar" class="btn-secondary" style="width: 100%; padding: 0.75rem;">Limpiar Filtros</button>
-        </div>
+
       </div>
     </div>
 
@@ -515,6 +396,26 @@
       document.getElementById('kpi-ac-cant').textContent = '0';
       document.getElementById('kpi-ac-val').textContent = '$0.00';
     }
+    function generarReportePDF() {
+  // Contenedor principal que abarca los filtros, KPIs y la tabla
+  const elemento = document.querySelector('.container');
+
+  // Opciones de configuración para el documento PDF
+  const opciones = {
+    margin:       0.3,
+    filename:     `Reporte_Actividades_${new Date().toISOString().split('T')[0]}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { 
+      scale: 2,            // Alta resolución
+      useCORS: true, 
+      backgroundColor: '#0b0f19' // Mantiene el fondo oscuro del dashboard
+    },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' } // Formato horizontal
+  };
+
+  // Generar y descargar el PDF
+  html2pdf().set(opciones).from(elemento).save();
+}
   </script>
 </body>
 </html>

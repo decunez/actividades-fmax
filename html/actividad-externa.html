@@ -6,103 +6,8 @@
   <title>Registrar Actividad Externa - Sistema FMAX</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/styles.css">
-  <style>
-    .form-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
+  <link rel="stylesheet" href="../css/formularios.css">
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .form-control {
-      padding: 0.75rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      border-radius: 6px;
-      outline: none;
-      font-size: 0.95rem;
-    }
-
-    .form-control:focus {
-      border-color: var(--accent);
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      margin-top: 0.25rem;
-    }
-
-    .radio-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-
-    .summary-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 1rem;
-      text-align: center;
-    }
-
-    .summary-item span {
-      display: block;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 0.25rem;
-    }
-
-    .summary-item strong {
-      font-size: 1.1rem;
-      color: var(--text-main);
-    }
-
-    .summary-item.total strong {
-      color: #10b981;
-      font-size: 1.3rem;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 1rem;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-  </style>
 </head>
 <body>
 
@@ -111,17 +16,18 @@
     <button class="menu-toggle" id="menuToggle">☰</button>
     <ul class="nav-links" id="navLinks">
       <li><a href="../index.html" class="active">Inicio</a></li>
-      <li><a href="usuarios.html">Usuarios</a></li>
       <li><a href="actividades.html">Actividades</a></li>
       <li><a href="reportes.html">Reportes</a></li>
-      <li><a href="configuracion.html">Configuración</a></li>
+      <li><a href="usuarios.html">Configuración</a></li>
     </ul>
   </nav>
 
   <main class="container">
     <section class="header-section" style="text-align: center; margin-bottom: 2rem;">
+     <div>
       <h1>Registrar Actividad Externa</h1>
       <p style="color: var(--text-muted);">Registro de actividades de cuadrillas externas</p>
+      </div>
     </section>
 
     <div class="form-card">

@@ -5,151 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Actividades FMAX</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <!-- Enlace al CSS -->
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-    /* Estilos complementarios para el Dashboard */
-    .header-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .action-buttons {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .periodo-selector {
-      background: var(--bg-surface, #1e293b);
-      border: 1px solid var(--border, #334155);
-      color: var(--text-main, #f8fafc);
-      padding: 0.65rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-    }
-
-    .kpi-card {
-      background-color: var(--bg-surface, #1e293b);
-      border: 1px solid var(--border, #334155);
-      border-radius: 12px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      position: relative;
-      border-left: 4px solid var(--accent, #3b82f6);
-    }
-
-    .kpi-card.green { border-left-color: #10b981; }
-    .kpi-card.blue { border-left-color: #3b82f6; }
-    .kpi-card.orange { border-left-color: #f59e0b; }
-    .kpi-card.purple { border-left-color: #8b5cf6; }
-
-    .kpi-title {
-      font-size: 0.78rem;
-      color: var(--text-muted, #94a3b8);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .kpi-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-main, #ffffff);
-    }
-
-    .kpi-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted, #94a3b8);
-    }
-
-    .panels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .panel-card {
-      background: var(--bg-surface, #1e293b);
-      border: 1px solid var(--border, #334155);
-      border-radius: 12px;
-      padding: 1.25rem;
-    }
-
-    .panel-card h3 {
-      font-size: 1.05rem;
-      margin-bottom: 1rem;
-      color: var(--text-main, #ffffff);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .stat-row:last-child {
-      border-bottom: none;
-    }
-
-    .table-container {
-      background-color: var(--bg-surface, #1e293b);
-      border: 1px solid var(--border, #334155);
-      border-radius: 12px;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.88rem;
-    }
-
-    th, td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border, #334155);
-      white-space: nowrap;
-    }
-
-    th {
-      background-color: rgba(255, 255, 255, 0.02);
-      color: var(--text-muted, #94a3b8);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-    }
-
-    .badge-tag {
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-    }
-  </style>
 </head>
 <body>
 
@@ -158,10 +14,9 @@
     <button class="menu-toggle" id="menuToggle">☰</button>
     <ul class="nav-links" id="navLinks">
       <li><a href="index.html" class="active">Inicio</a></li>
-      <li><a href="html/usuarios.html">Usuarios</a></li>
       <li><a href="html/actividades.html">Actividades</a></li>
-      <li><a href="reportes.html">Reportes</a></li>
-      <li><a href="configuracion.html">Configuración</a></li>
+      <li><a href="#">Reportes</a></li>
+      <li><a href="html/usuarios.html">Configuracion</a></li>
     </ul>
   </nav>
 
