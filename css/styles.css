@@ -277,3 +277,54 @@ body {
       background: rgba(59, 130, 246, 0.15);
       color: #60a5fa;
     }
+
+
+    /* ==========================================
+   ESTILOS EXCLUSIVOS PARA GENERACIÓN DE PDF
+   ========================================== */
+body.generating-pdf {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-family: Arial, sans-serif !important;
+}
+
+/* Ocultar botones, controles y filtros de búsqueda */
+body.generating-pdf .btn-pdf,
+body.generating-pdf .btn-primary,
+body.generating-pdf .btn-secondary,
+body.generating-pdf .header-actions,
+body.generating-pdf select,
+body.generating-pdf input,
+body.generating-pdf button,
+body.generating-pdf .filter-section,
+body.generating-pdf .navbar {
+  display: none !important;
+}
+
+/* Convertir tarjetas e indicadores a formato claro impreso */
+body.generating-pdf .kpi-card,
+body.generating-pdf .form-card,
+body.generating-pdf .card {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: none !important;
+}
+
+/* Formato de tabla limpio y de alto contraste */
+body.generating-pdf table {
+  width: 100% !important;
+  color: #0f172a !important;
+  border-collapse: collapse !important;
+}
+
+body.generating-pdf th {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+}
+
+body.generating-pdf td {
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #334155 !important;
+}

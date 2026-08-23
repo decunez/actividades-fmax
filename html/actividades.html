@@ -396,25 +396,35 @@
       document.getElementById('kpi-ac-cant').textContent = '0';
       document.getElementById('kpi-ac-val').textContent = '$0.00';
     }
-    function generarReportePDF() {
-  // Contenedor principal que abarca los filtros, KPIs y la tabla
-  const elemento = document.querySelector('.container');
+async function generarReportePDF() {
+  const elemento = document.querySelector('.container'); // Contenedor principal
 
-  // Opciones de configuración para el documento PDF
+  // 1. Activar estilos de impresión (oculta botones y cambia a fondo blanco)
+  document.body.classList.add('generating-pdf');
+
+  // 2. Configurar el PDF optimizado
   const opciones = {
-    margin:       0.3,
+    margin:       [0.4, 0.4, 0.4, 0.4], // Márgenes: arriba, izquierda, abajo, derecha (pulgadas)
     filename:     `Reporte_Actividades_${new Date().toISOString().split('T')[0]}.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { 
-      scale: 2,            // Alta resolución
-      useCORS: true, 
-      backgroundColor: '#0b0f19' // Mantiene el fondo oscuro del dashboard
+      scale: 2, 
+      backgroundColor: '#ffffff',
+      useCORS: true 
     },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' } // Formato horizontal
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' },
+    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Evita cortes bruscos de filas de la tabla
   };
 
-  // Generar y descargar el PDF
-  html2pdf().set(opciones).from(elemento).save();
+  try {
+    // 3. Generar y descargar el reporte
+    await html2pdf().set(opciones).from(elemento).save();
+  } catch (error) {
+    console.error('Error al generar el PDF:', error);
+  } finally {
+    // 4. Restaurar el diseño oscuro original del sistema
+    document.body.classList.remove('generating-pdf');
+  }
 }
   </script>
 </body>
