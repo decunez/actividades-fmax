@@ -7,6 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <!-- Librería para convertir HTML a PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- jsPDF y AutoTable para generación limpia de PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="../css/actividades.css">
 </head>
@@ -136,7 +139,7 @@
 
     <!-- Tabla -->
     <div class="table-container">
-      <table>
+      <table id="tablaActividades">
         <thead>
           <tr>
             <th>Fecha</th>
@@ -396,35 +399,78 @@
       document.getElementById('kpi-ac-cant').textContent = '0';
       document.getElementById('kpi-ac-val').textContent = '$0.00';
     }
-async function generarReportePDF() {
-  const elemento = document.querySelector('.container'); // Contenedor principal
 
-  // 1. Activar estilos de impresión (oculta botones y cambia a fondo blanco)
-  document.body.classList.add('generating-pdf');
 
-  // 2. Configurar el PDF optimizado
-  const opciones = {
-    margin:       [0.4, 0.4, 0.4, 0.4], // Márgenes: arriba, izquierda, abajo, derecha (pulgadas)
-    filename:     `Reporte_Actividades_${new Date().toISOString().split('T')[0]}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { 
-      scale: 2, 
-      backgroundColor: '#ffffff',
-      useCORS: true 
+function generarReportePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+  // Encabezado del documento
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(15, 23, 42);
+  doc.text('REPORTE DETALLADO DE ACTIVIDADES', 40, 40);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  const fechaHoy = new Date().toLocaleDateString('es-ES', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  doc.text(`Fecha de emisión: ${fechaHoy}`, 40, 54);
+
+  // Línea divisoria
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(1);
+  doc.line(40, 62, 802, 62);
+
+  // AutoTable: Construye la tabla leyendo el HTML directamente
+  doc.autoTable({
+    html: '#tablaActividades',
+    startY: 75,
+    margin: { left: 40, right: 40 },
+    theme: 'grid',
+    headStyles: {
+      fillColor: [21, 28, 44], // Tono oscuro (#151c2c) acorde a tu diseño
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      fontSize: 8.5,
+      halign: 'center'
     },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' },
-    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // Evita cortes bruscos de filas de la tabla
-  };
+    bodyStyles: {
+      fontSize: 8,
+      textColor: [51, 65, 85]
+    },
+    columnStyles: {
+      0: { halign: 'center' }, // Fecha
+      1: { halign: 'center' }, // Cuadrilla
+      2: { halign: 'left' },   // Cliente
+      3: { halign: 'center' }, // Tipo
+      4: { halign: 'center' }, // Forma
+      5: { halign: 'right' },  // Fibra
+      6: { halign: 'center' }, // Pt. Red
+      7: { halign: 'center' }, // AC
+      8: { halign: 'right', fontStyle: 'bold' } // Total ($)
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252]
+    },
+    didDrawPage: function (data) {
+      // Numeración de páginas
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text(
+        `Página ${data.pageNumber}`,
+        doc.internal.pageSize.width - 60,
+        doc.internal.pageSize.height - 20
+      );
+    }
+  });
 
-  try {
-    // 3. Generar y descargar el reporte
-    await html2pdf().set(opciones).from(elemento).save();
-  } catch (error) {
-    console.error('Error al generar el PDF:', error);
-  } finally {
-    // 4. Restaurar el diseño oscuro original del sistema
-    document.body.classList.remove('generating-pdf');
-  }
+  doc.save(`Reporte_Actividades_${new Date().toISOString().split('T')[0]}.pdf`);
+}
 }
   </script>
 </body>
