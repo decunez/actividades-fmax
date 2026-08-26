@@ -1,7 +1,5 @@
-import { connect } from '@tidbcloud/serverless';
-
-export default async function handler(req, res) {
-  // Encabezados CORS
+module.exports = async function handler(req, res) {
+  // Configuración de encabezados CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -27,18 +25,32 @@ export default async function handler(req, res) {
     }
 
     if (!process.env.DATABASE_URL) {
-      return res.status(500).json({ error: 'DATABASE_URL no definida en Vercel' });
+      return res.status(500).json({ error: 'La variable DATABASE_URL no está configurada en Vercel' });
     }
 
-    const conn = connect({ url: process.env.DATABASE_URL });
-    const result = await conn.execute(
-      'SELECT id, nombre, usuario, sector FROM actividades.usuarios WHERE usuario = ? AND password = ?',
-      [usuario, password]
-    );
+    let rows = [];
 
-    const rows = Array.isArray(result) ? result : (result.rows || []);
+    // Estrategia de conexión dual (TiDB / MySQL)
+    try {
+      const { connect } = require('@tidbcloud/serverless');
+      const conn = connect({ url: process.env.DATABASE_URL });
+      const result = await conn.execute(
+        'SELECT id, nombre, usuario, sector FROM actividades.usuarios WHERE usuario = ? AND password = ?',
+        [usuario, password]
+      );
+      rows = Array.isArray(result) ? result : (result.rows || []);
+    } catch (e1) {
+      const mysql = require('mysql2/promise');
+      const connection = await mysql.createConnection(process.env.DATABASE_URL);
+      const [resRows] = await connection.execute(
+        'SELECT id, nombre, usuario, sector FROM actividades.usuarios WHERE usuario = ? AND password = ?',
+        [usuario, password]
+      );
+      await connection.end();
+      rows = resRows;
+    }
 
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     }
 
@@ -59,4 +71,4 @@ export default async function handler(req, res) {
     console.error('Error en Login API:', error);
     return res.status(500).json({ error: 'Error del servidor: ' + error.message });
   }
-}
+};
