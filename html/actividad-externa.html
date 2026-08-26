@@ -169,159 +169,243 @@
   </main>
 
   <script src="../script.js"></script>
-  <script>
-    const API_GUARDAR = 'https://actividades-fmax.vercel.app/api/guardar-actividad';
+<script>
+  const API_GUARDAR = 'https://actividades-fmax.vercel.app/api/actividad-externa';
+  let idActividadEditando = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('fecha').valueAsDate = new Date();
+  document.addEventListener('DOMContentLoaded', () => {
+    const selectCuadrilla = document.getElementById('select_cuadrilla');
+    const customCuadrilla = document.getElementById('custom_cuadrilla');
+    const selectSector = document.getElementById('select_sector');
+    const customSector = document.getElementById('custom_sector');
+    const selectTipo = document.getElementById('tipo_actividad');
+    const selectForma = document.getElementById('forma_actividad');
 
-      const selectCuadrilla = document.getElementById('select_cuadrilla');
-      const customCuadrilla = document.getElementById('custom_cuadrilla');
-      const selectSector = document.getElementById('select_sector');
-      const customSector = document.getElementById('custom_sector');
-
-      selectCuadrilla.addEventListener('change', () => {
-        if (selectCuadrilla.value === 'OTRO') {
-          customCuadrilla.classList.remove('hidden');
-          customCuadrilla.required = true;
-        } else {
-          customCuadrilla.classList.add('hidden');
-          customCuadrilla.required = false;
-        }
-      });
-
-      selectSector.addEventListener('change', () => {
-        if (selectSector.value === 'OTRO') {
-          customSector.classList.remove('hidden');
-          customSector.required = true;
-        } else {
-          customSector.classList.add('hidden');
-          customSector.required = false;
-        }
-      });
-
-      // Dinámica de Forma de Actividad segun Tipo
-      const selectTipo = document.getElementById('tipo_actividad');
-      const selectForma = document.getElementById('forma_actividad');
-
-      selectTipo.addEventListener('change', () => {
-        const val = selectTipo.value;
-        selectForma.innerHTML = '';
-        selectForma.disabled = false;
-
-        if (val === 'INSTALACION' || val === 'TRASLADO') {
-          selectForma.innerHTML = `
-            <option value="NORMAL">NORMAL</option>
-            <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
-          `;
-        } else if (val === 'VISITA') {
-          selectForma.innerHTML = `
-            <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
-            <option value="RECABLEADO">RECABLEADO</option>
-            <option value="NORMAL">NORMAL</option>
-          `;
-        } else {
-          selectForma.disabled = true;
-          selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
-        }
-        calcularTotal();
-      });
-
-      // Eventos de recálculo
-      selectForma.addEventListener('change', calcularTotal);
-      document.getElementById('cantidad_fibra').addEventListener('input', calcularTotal);
-      document.querySelectorAll('input[name="punto_red"]').forEach(r => r.addEventListener('change', calcularTotal));
-      document.querySelectorAll('input[name="ac"]').forEach(r => r.addEventListener('change', calcularTotal));
-
-      // Guardar formulario
-      document.getElementById('form-actividad').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const cuadrillaFinal = selectCuadrilla.value === 'OTRO' ? customCuadrilla.value : selectCuadrilla.value;
-        const sectorFinal = selectSector.value === 'OTRO' ? customSector.value : selectSector.value;
-
-        const data = {
-          id_usuario: 1,
-          cuadrilla: cuadrillaFinal,
-          sector: sectorFinal,
-          cliente: document.getElementById('cliente').value,
-          fecha: document.getElementById('fecha').value,
-          tipo_actividad: selectTipo.value,
-          forma_actividad: selectForma.value,
-          cantidad_fibra: Number(document.getElementById('cantidad_fibra').value) || 0,
-          punto_red: Number(document.querySelector('input[name="punto_red"]:checked').value) || 0,
-          ac: Number(document.querySelector('input[name="ac"]:checked').value) || 0
-        };
-
-        const btn = document.getElementById('btn-guardar');
-        btn.disabled = true;
-        btn.textContent = 'Guardando...';
-
-        try {
-          const res = await fetch(API_GUARDAR, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-          });
-
-          const result = await res.json();
-
-          if (res.ok && result.success) {
-            alert('Actividad externa guardada correctamente');
-            window.location.href = 'actividades.html';
-          } else {
-            alert('Error al guardar: ' + (result.error || 'Ocurrió un problema'));
-          }
-        } catch (err) {
-          console.error(err);
-          alert('Error de conexión con el servidor');
-        } finally {
-          btn.disabled = false;
-          btn.textContent = 'Guardar Actividad';
-        }
-      });
+    // 1. Listeners para desplegables con opción "OTRO"
+    selectCuadrilla.addEventListener('change', () => {
+      const esOtro = selectCuadrilla.value === 'OTRO';
+      customCuadrilla.classList.toggle('hidden', !esOtro);
+      customCuadrilla.required = esOtro;
     });
 
-function calcularTotal() {
-  const tipo = document.getElementById('tipo_actividad').value;
-  const forma = (document.getElementById('forma_actividad')?.value || '').trim().toUpperCase();
-  const fibra = Number(document.getElementById('cantidad_fibra').value) || 0;
-  const pred = Number(document.querySelector('input[name="punto_red"]:checked')?.value) || 0;
-  const ac = Number(document.querySelector('input[name="ac"]:checked')?.value) || 0;
+    selectSector.addEventListener('change', () => {
+      const esOtro = selectSector.value === 'OTRO';
+      customSector.classList.toggle('hidden', !esOtro);
+      customSector.required = esOtro;
+    });
 
-  let cantidadAct = 1;
-  let valAct = 6.00;
+    // 2. Listener para Tipo de Actividad
+    selectTipo.addEventListener('change', () => {
+      actualizarOpcionesForma(selectTipo.value);
+      calcularTotal();
+    });
 
-  // Reglas de tarifa ajustadas
-  if (forma.includes('DUCTERIA')) {
-    cantidadAct = 2;
-    valAct = 14.00;
-  } else if (forma.includes('RECABLEADO')) {
-    cantidadAct = 1;
-    valAct = 7.00;
-  } else if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
-    cantidadAct = 1;
-    valAct = 7.00; // INSTALACIÓN y TRASLADO normales cuestan $7.00
-  } else {
-    cantidadAct = 1;
-    valAct = 6.00; // VISITA normal cuesta $6.00
+    // 3. Listeners de recálculo en tiempo real
+    selectForma.addEventListener('change', calcularTotal);
+    document.getElementById('cantidad_fibra').addEventListener('input', calcularTotal);
+    document.querySelectorAll('input[name="punto_red"]').forEach(r => r.addEventListener('change', calcularTotal));
+    document.querySelectorAll('input[name="ac"]').forEach(r => r.addEventListener('change', calcularTotal));
+
+    // 4. Guardar / Actualizar Formulario
+    document.getElementById('form-actividad').addEventListener('submit', guardarActividad);
+
+    // 5. Determinar si se cargan datos para Edición o Registro Nuevo
+    const datosEdit = localStorage.getItem('actividadEditando');
+    if (datosEdit) {
+      cargarDatosEdicion(JSON.parse(datosEdit));
+    } else {
+      document.getElementById('fecha').valueAsDate = new Date();
+    }
+  });
+
+  // Función para poblar dinámicamente las formas según el tipo seleccionado
+  function actualizarOpcionesForma(tipoVal) {
+    const selectForma = document.getElementById('forma_actividad');
+    selectForma.innerHTML = '';
+    selectForma.disabled = false;
+
+    if (tipoVal === 'INSTALACION' || tipoVal === 'TRASLADO') {
+      selectForma.innerHTML = `
+        <option value="NORMAL">NORMAL</option>
+        <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
+      `;
+    } else if (tipoVal === 'VISITA') {
+      selectForma.innerHTML = `
+        <option value="NORMAL">CAMBIO CONECTOR</option>
+        <option value="RECABLEADO-NORMAL">RECABLEADO-NORMAL</option>
+        <option value="RECABLEADO-DUCTERIA">RECABLEADO-DUCTERIA</option>
+        <option value="RECABLEADO-SOTERRADO">RECABLEADO-SOTERRADO</option>
+      `;
+    } else {
+      selectForma.disabled = true;
+      selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
+    }
   }
 
-  const excedente = fibra > 300 ? fibra - 300 : 0;
-  const valExcedente = excedente * 0.04;
-  const valPred = pred * 5.00;
-  const valAc = ac * 5.00;
-  const total = valAct + valExcedente + valPred + valAc;
+  // Cargar y autocompletar el formulario al editar
+  function cargarDatosEdicion(act) {
+    idActividadEditando = act.id || act.id_actividad || null;
 
-  // Actualizar vista previa
-  document.getElementById('sum-cant').textContent = cantidadAct;
-  document.getElementById('sum-val-act').textContent = `$${valAct.toFixed(2)}`;
-  document.getElementById('sum-excedente').textContent = `${excedente} m`;
-  document.getElementById('sum-val-excedente').textContent = `$${valExcedente.toFixed(2)}`;
-  document.getElementById('sum-val-pred').textContent = `$${valPred.toFixed(2)}`;
-  document.getElementById('sum-val-ac').textContent = `$${valAc.toFixed(2)}`;
-  document.getElementById('sum-total').textContent = `$${total.toFixed(2)}`;
-}
-  </script>
+    // Cliente y Fecha
+    if (act.cliente) document.getElementById('cliente').value = act.cliente;
+    if (act.fecha) document.getElementById('fecha').value = act.fecha.toString().substring(0, 10);
+
+    // Cuadrilla (Soporte para opción en select o personalizada)
+    setSelectOrCustom(document.getElementById('select_cuadrilla'), document.getElementById('custom_cuadrilla'), act.cuadrilla);
+
+    // Sector (Soporte para opción en select o personalizada)
+    setSelectOrCustom(document.getElementById('select_sector'), document.getElementById('custom_sector'), act.sector);
+
+    // Tipo de Actividad y actualización de Formas
+    const tipoVal = act.tipo_actividad || act.tipo || '';
+    if (tipoVal) {
+      document.getElementById('tipo_actividad').value = tipoVal;
+      actualizarOpcionesForma(tipoVal);
+    }
+
+    // Forma de Actividad
+    const formaVal = act.forma_actividad || act.forma || '';
+    if (formaVal) {
+      document.getElementById('forma_actividad').value = formaVal;
+    }
+
+    // Cantidad de Fibra
+    document.getElementById('cantidad_fibra').value = act.cantidad_fibra || act.fibra || 0;
+
+    // Radio Button: Punto de Red
+    const valRed = (act.punto_red !== undefined && act.punto_red !== null) ? act.punto_red.toString() : '0';
+    const radioRed = document.querySelector(`input[name="punto_red"][value="${valRed}"]`);
+    if (radioRed) radioRed.checked = true;
+
+    // Radio Button: Equipo AC
+    const valAc = (act.ac !== undefined && act.ac !== null) ? act.ac.toString() : '0';
+    const radioAc = document.querySelector(`input[name="ac"][value="${valAc}"]`);
+    if (radioAc) radioAc.checked = true;
+
+    // Cambiar texto del botón principal
+    const btn = document.getElementById('btn-guardar') || document.querySelector('button[type="submit"]');
+    if (btn) btn.textContent = 'Actualizar Actividad';
+
+    // Recalcular montos en pantalla
+    calcularTotal();
+
+    // Limpiar almacenamiento temporal
+    localStorage.removeItem('actividadEditando');
+  }
+
+  // Auxiliar para seleccionar un valor en un select o activar el campo "OTRO"
+  function setSelectOrCustom(selectEl, customEl, value) {
+    if (!value) return;
+    const existe = Array.from(selectEl.options).some(opt => opt.value === value);
+    if (existe) {
+      selectEl.value = value;
+      customEl.classList.add('hidden');
+      customEl.required = false;
+    } else {
+      selectEl.value = 'OTRO';
+      customEl.value = value;
+      customEl.classList.remove('hidden');
+      customEl.required = true;
+    }
+  }
+
+  function calcularTotal() {
+    const tipo = document.getElementById('tipo_actividad').value;
+    const forma = (document.getElementById('forma_actividad')?.value || '').trim().toUpperCase();
+    const fibra = Number(document.getElementById('cantidad_fibra').value) || 0;
+    const pred = Number(document.querySelector('input[name="punto_red"]:checked')?.value) || 0;
+    const ac = Number(document.querySelector('input[name="ac"]:checked')?.value) || 0;
+
+    let cantidadAct = 1;
+    let valAct = 6.00;
+
+    if (forma.includes('DUCTERIA')) {
+      cantidadAct = 2;
+      valAct = 14.00;
+    } else if (forma.includes('RECABLEADO')) {
+      cantidadAct = 1;
+      valAct = 7.00;
+    } else if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
+      cantidadAct = 1;
+      valAct = 7.00;
+    } else {
+      cantidadAct = 1;
+      valAct = 6.00;
+    }
+
+    const excedente = fibra > 300 ? fibra - 300 : 0;
+    const valExcedente = excedente * 0.04;
+    const valPred = pred * 5.00;
+    const valAc = ac * 5.00;
+    const total = valAct + valExcedente + valPred + valAc;
+
+    // Actualizar vista previa en interfaz
+    if (document.getElementById('sum-cant')) document.getElementById('sum-cant').textContent = cantidadAct;
+    if (document.getElementById('sum-val-act')) document.getElementById('sum-val-act').textContent = `$${valAct.toFixed(2)}`;
+    if (document.getElementById('sum-excedente')) document.getElementById('sum-excedente').textContent = `${excedente} m`;
+    if (document.getElementById('sum-val-excedente')) document.getElementById('sum-val-excedente').textContent = `$${valExcedente.toFixed(2)}`;
+    if (document.getElementById('sum-val-pred')) document.getElementById('sum-val-pred').textContent = `$${valPred.toFixed(2)}`;
+    if (document.getElementById('sum-val-ac')) document.getElementById('sum-val-ac').textContent = `$${valAc.toFixed(2)}`;
+    if (document.getElementById('sum-total')) document.getElementById('sum-total').textContent = `$${total.toFixed(2)}`;
+  }
+
+  async function guardarActividad(e) {
+    e.preventDefault();
+
+    const selectCuadrilla = document.getElementById('select_cuadrilla');
+    const customCuadrilla = document.getElementById('custom_cuadrilla');
+    const selectSector = document.getElementById('select_sector');
+    const customSector = document.getElementById('custom_sector');
+
+    const cuadrillaFinal = selectCuadrilla.value === 'OTRO' ? customCuadrilla.value : selectCuadrilla.value;
+    const sectorFinal = selectSector.value === 'OTRO' ? customSector.value : selectSector.value;
+
+    const clienteInput = document.getElementById('cliente').value.trim();
+
+    const data = {
+      id_usuario: 1,
+      cuadrilla: cuadrillaFinal,
+      sector: sectorFinal,
+      cliente: clienteInput !== '' ? clienteInput : 'NO DEFINIDO',
+      fecha: document.getElementById('fecha').value,
+      tipo_actividad: document.getElementById('tipo_actividad').value,
+      forma_actividad: document.getElementById('forma_actividad').value,
+      cantidad_fibra: Number(document.getElementById('cantidad_fibra').value) || 0,
+      punto_red: Number(document.querySelector('input[name="punto_red"]:checked')?.value) || 0,
+      ac: Number(document.querySelector('input[name="ac"]:checked')?.value) || 0
+    };
+
+    if (idActividadEditando) {
+      data.id = idActividadEditando;
+    }
+
+    const btn = document.getElementById('btn-guardar') || document.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = idActividadEditando ? 'Actualizando...' : 'Guardando...';
+
+    try {
+      const res = await fetch(API_GUARDAR, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        alert(idActividadEditando ? 'Actividad externa actualizada correctamente' : 'Actividad externa guardada correctamente');
+        window.location.href = 'actividades.html';
+      } else {
+        alert('Error al guardar: ' + (result.error || 'Ocurrió un problema'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión con el servidor');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = idActividadEditando ? 'Actualizar Actividad' : 'Guardar Actividad';
+    }
+  }
+</script>
 </body>
 </html>

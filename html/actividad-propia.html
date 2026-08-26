@@ -167,36 +167,105 @@
   </main>
 
   <script src="../script.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-      cargarUsuariosSelect();
+<script>
+let usuariosCache = [];
+let idActividadEditando = null;
 
-      document.getElementById('tipo_actividad').addEventListener('change', actualizarFormaActividad);
-      document.getElementById('forma_actividad').addEventListener('change', calcularValores);
-      document.getElementById('cantidad_fibra').addEventListener('input', calcularValores);
-      
-      // Radio Buttons listeners
-      document.querySelectorAll('input[name="tiene_punto_red"]').forEach(r => {
-        r.addEventListener('change', (e) => {
-          document.getElementById('group-punto-red-cant').style.display = e.target.value === 'SI' ? 'flex' : 'none';
-          calcularValores();
-        });
-      });
-      document.getElementById('punto_red_cant').addEventListener('change', calcularValores);
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Cargar la lista de usuarios
+  await cargarUsuariosSelect();
 
-      document.querySelectorAll('input[name="tiene_ac"]').forEach(r => {
-        r.addEventListener('change', (e) => {
-          document.getElementById('group-ac-cant').style.display = e.target.value === 'SI' ? 'flex' : 'none';
-          calcularValores();
-        });
-      });
-      document.getElementById('ac_cant').addEventListener('change', calcularValores);
+  // 2. Establecer la fecha de hoy por defecto
+  document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 
-      document.getElementById('form-actividad-propia').addEventListener('submit', guardarActividad);
+  // 3. Registrar Event Listeners
+  document.getElementById('tipo_actividad').addEventListener('change', () => {
+    actualizarFormaActividad();
+    calcularValores();
+  });
+  
+  document.getElementById('forma_actividad').addEventListener('change', calcularValores);
+  document.getElementById('cantidad_fibra').addEventListener('input', calcularValores);
+
+  // Listeners Radio Buttons (Punto de Red)
+  document.querySelectorAll('input[name="tiene_punto_red"]').forEach(r => {
+    r.addEventListener('change', (e) => {
+      document.getElementById('group-punto-red-cant').style.display = e.target.value === 'SI' ? 'flex' : 'none';
+      calcularValores();
     });
+  });
+  document.getElementById('punto_red_cant').addEventListener('change', calcularValores);
 
-    let usuariosCache = [];
+  // Listeners Radio Buttons (Equipo AC)
+  document.querySelectorAll('input[name="tiene_ac"]').forEach(r => {
+    r.addEventListener('change', (e) => {
+      document.getElementById('group-ac-cant').style.display = e.target.value === 'SI' ? 'flex' : 'none';
+      calcularValores();
+    });
+  });
+  document.getElementById('ac_cant').addEventListener('change', calcularValores);
+
+  // Formulario Submit
+  document.getElementById('form-actividad-propia').addEventListener('submit', guardarActividad);
+
+  // 4. Verificar y cargar datos en modo Edición
+  cargarDatosEdicion();
+});
+
+function cargarDatosEdicion() {
+  const datosEdit = localStorage.getItem('actividadEditando');
+  if (!datosEdit) return;
+
+  const act = JSON.parse(datosEdit);
+  idActividadEditando = act.id || act.id_actividad || null;
+
+  // Cargar Cliente, Fecha y Usuario
+  if (act.cliente) document.getElementById('cliente').value = act.cliente;
+  if (act.fecha) document.getElementById('fecha').value = act.fecha.toString().substring(0, 10);
+  if (act.id_usuario) document.getElementById('id_usuario').value = act.id_usuario;
+
+  // Cargar Tipo de Actividad y desplegar sus Opciones de Forma
+  if (act.tipo_actividad) {
+    document.getElementById('tipo_actividad').value = act.tipo_actividad;
+    actualizarFormaActividad(); 
+  }
+
+  // Cargar Forma de Actividad
+  if (act.forma_actividad) {
+    document.getElementById('forma_actividad').value = act.forma_actividad;
+  }
+
+  // Cargar Cantidad de Fibra
+  document.getElementById('cantidad_fibra').value = act.cantidad_fibra || act.fibra || 0;
+
+  // Cargar Punto de Red
+  const tienePunto = (act.punto_red > 0 || act.tiene_punto_red === 'SI');
+  const radioPunto = document.querySelector(`input[name="tiene_punto_red"][value="${tienePunto ? 'SI' : 'NO'}"]`);
+  if (radioPunto) {
+    radioPunto.checked = true;
+    document.getElementById('group-punto-red-cant').style.display = tienePunto ? 'flex' : 'none';
+    if (tienePunto) document.getElementById('punto_red_cant').value = act.punto_red || 1;
+  }
+
+  // Cargar Equipo AC
+  const tieneAc = (act.ac > 0 || act.tiene_ac === 'SI');
+  const radioAc = document.querySelector(`input[name="tiene_ac"][value="${tieneAc ? 'SI' : 'NO'}"]`);
+  if (radioAc) {
+    radioAc.checked = true;
+    document.getElementById('group-ac-cant').style.display = tieneAc ? 'flex' : 'none';
+    if (tieneAc) document.getElementById('ac_cant').value = act.ac || 1;
+  }
+
+  // Recalcular montos en la interfaz
+  calcularValores();
+
+  // Cambiar el texto del botón
+  const btnSubmit = document.querySelector('#form-actividad-propia button[type="submit"]') || document.querySelector('.btn-primary');
+  if (btnSubmit) btnSubmit.textContent = 'Actualizar Actividad';
+
+  // Limpiar almacenamiento temporal
+  localStorage.removeItem('actividadEditando');
+}
 
 async function cargarUsuariosSelect() {
   const select = document.getElementById('id_usuario');
@@ -206,12 +275,10 @@ async function cargarUsuariosSelect() {
     select.innerHTML = '<option value="">Seleccione un usuario...</option>';
     
     usuariosCache.forEach(u => {
-      // Auto-seleccionar si el ID es 1
       const selectedAttr = u.id == 1 ? 'selected' : '';
       select.innerHTML += `<option value="${u.id}" ${selectedAttr}>${u.nombre} (${u.sector || 'S/N'})</option>`;
     });
 
-    // Forzar la selección por código por si acaso
     if (usuariosCache.some(u => u.id == 1)) {
       select.value = '1';
     }
@@ -220,87 +287,89 @@ async function cargarUsuariosSelect() {
   }
 }
 
-    function actualizarFormaActividad() {
-      const tipo = document.getElementById('tipo_actividad').value;
-      const selectForma = document.getElementById('forma_actividad');
+function actualizarFormaActividad() {
+  const tipo = document.getElementById('tipo_actividad').value;
+  const selectForma = document.getElementById('forma_actividad');
 
-      selectForma.innerHTML = '';
-      selectForma.disabled = false;
+  selectForma.innerHTML = '';
+  selectForma.disabled = false;
 
-      if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
-        selectForma.innerHTML = `
-          <option value="NORMAL">NORMAL</option>
-          <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
-        `;
-      } else if (tipo === 'VISITA') {
-        selectForma.innerHTML = `
-          <option value="NORMAL">NORMAL</option>
-          <option value="RECABLEADO NORMAL">RECABLEADO NORMAL</option>
-          <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
-        `;
-      } else {
-        selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
-        selectForma.disabled = true;
-      }
-      calcularValores();
-    }
+  if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
+    selectForma.innerHTML = `
+      <option value="NORMAL">NORMAL</option>
+      <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
+    `;
+  } else if (tipo === 'VISITA') {
+    selectForma.innerHTML = `
+      <option value="NORMAL">CAMBIO CONECTOR</option>
+      <option value="RECABLEADO-NORMAL">RECABLEADO-NORMAL</option>
+      <option value="RECABLEADO-DUCTERIA">RECABLEADO-DUCTERIA</option>
+      <option value="RECABLEADO-SOTERRADO">RECABLEADO-SOTERRADO</option>
+    `;
+  } else {
+    selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
+    selectForma.disabled = true;
+  }
+}
 
-    function calcularValores() {
-      const tipo = document.getElementById('tipo_actividad').value;
-      const forma = document.getElementById('forma_actividad').value;
-      const fibra = parseInt(document.getElementById('cantidad_fibra').value) || 0;
+function calcularValores() {
+  const tipo = document.getElementById('tipo_actividad').value;
+  const forma = document.getElementById('forma_actividad').value;
+  const fibra = parseInt(document.getElementById('cantidad_fibra').value) || 0;
 
-      // 1. cantidad_act
-      const cantidad_act = forma === 'DUCTERIA' ? 2 : 1;
+  // 1. cantidad_act
+  const cantidad_act = forma === 'DUCTERIA' ? 2 : 1;
 
-      // 2. valor_actividad
-      let valor_actividad = 0;
-      if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
-        valor_actividad = forma === 'DUCTERIA' ? 14 : 7;
-      } else if (tipo === 'VISITA') {
-        if (forma === 'NORMAL') valor_actividad = 6;
-        else if (forma === 'RECABLEADO NORMAL') valor_actividad = 7;
-        else if (forma === 'DUCTERIA') valor_actividad = 14;
-      }
+  // 2. valor_actividad
+  let valor_actividad = 0;
+  if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
+    valor_actividad = forma === 'DUCTERIA' ? 14 : 7;
+  } else if (tipo === 'VISITA') {
+    if (forma === 'NORMAL') valor_actividad = 6;
+    else if (forma === 'RECABLEADO-NORMAL') valor_actividad = 7;
+    else if (forma === 'RECABLEADO-DUCTERIA') valor_actividad = 14;
+    else if (forma === 'RECABLEADO-SOTERRADO') valor_actividad = 14;
+  }
 
-      // 3. punto_red y valor_pred
-      const tienePunto = document.querySelector('input[name="tiene_punto_red"]:checked').value === 'SI';
-      const punto_red = tienePunto ? parseInt(document.getElementById('punto_red_cant').value) : 0;
-      const valor_pred = punto_red * 1;
+  // 3. punto_red y valor_pred
+  const puntoRedChecked = document.querySelector('input[name="tiene_punto_red"]:checked');
+  const tienePunto = puntoRedChecked ? puntoRedChecked.value === 'SI' : false;
+  const punto_red = tienePunto ? (parseInt(document.getElementById('punto_red_cant').value) || 0) : 0;
+  const valor_pred = punto_red * 1;
 
-      // 4. ac y valor_ac
-      const tieneAc = document.querySelector('input[name="tiene_ac"]:checked').value === 'SI';
-      const ac = tieneAc ? parseInt(document.getElementById('ac_cant').value) : 0;
-      const valor_ac = ac * 1;
+  // 4. ac y valor_ac
+  const acChecked = document.querySelector('input[name="tiene_ac"]:checked');
+  const tieneAc = acChecked ? acChecked.value === 'SI' : false;
+  const ac = tieneAc ? (parseInt(document.getElementById('ac_cant').value) || 0) : 0;
+  const valor_ac = ac * 1;
 
-      // 5. exedente y valor_exedente
-      const exedente = fibra > 350 ? fibra - 350 : 0;
-      const valor_exedente = exedente * 0.04;
+  // 5. exedente y valor_exedente
+  const exedente = fibra > 350 ? fibra - 350 : 0;
+  const valor_exedente = exedente * 0.04;
 
-      // 6. Total actividad (Suma de los valores)
-      const total_act = valor_actividad + valor_pred + valor_ac + valor_exedente;
+  // 6. Total actividad
+  const total_act = valor_actividad + valor_pred + valor_ac + valor_exedente;
 
-      // Renderizar interfaz
-      document.getElementById('disp_cantidad_act').textContent = cantidad_act;
-      document.getElementById('disp_valor_actividad').textContent = `$${valor_actividad.toFixed(2)}`;
-      document.getElementById('disp_valor_pred').textContent = `$${valor_pred.toFixed(2)}`;
-      document.getElementById('disp_valor_ac').textContent = `$${valor_ac.toFixed(2)}`;
-      document.getElementById('disp_exedente').textContent = exedente;
-      document.getElementById('disp_valor_exedente').textContent = `$${valor_exedente.toFixed(2)}`;
-      document.getElementById('disp_total_act').textContent = `$${total_act.toFixed(2)}`;
+  // Renderizar interfaz
+  document.getElementById('disp_cantidad_act').textContent = cantidad_act;
+  document.getElementById('disp_valor_actividad').textContent = `$${valor_actividad.toFixed(2)}`;
+  document.getElementById('disp_valor_pred').textContent = `$${valor_pred.toFixed(2)}`;
+  document.getElementById('disp_valor_ac').textContent = `$${valor_ac.toFixed(2)}`;
+  document.getElementById('disp_exedente').textContent = exedente;
+  document.getElementById('disp_valor_exedente').textContent = `$${valor_exedente.toFixed(2)}`;
+  document.getElementById('disp_total_act').textContent = `$${total_act.toFixed(2)}`;
 
-      return {
-        cantidad_act, valor_actividad, punto_red, valor_pred,
-        ac, valor_ac, exedente, valor_exedente, total_act
-      };
-    }
+  return {
+    cantidad_act, valor_actividad, punto_red, valor_pred,
+    ac, valor_ac, exedente, valor_exedente, total_act
+  };
+}
 
 async function guardarActividad(e) {
   e.preventDefault();
   const calc = calcularValores();
   const usuarioSel = usuariosCache.find(u => u.id == document.getElementById('id_usuario').value);
 
-  // Si el campo cliente está vacío o tiene solo espacios, asigna 'NO DEFINIDO'
   const clienteInput = document.getElementById('cliente').value.trim();
   const clienteFinal = clienteInput !== '' ? clienteInput : 'NO DEFINIDO';
 
@@ -324,15 +393,19 @@ async function guardarActividad(e) {
     total_act: calc.total_act
   };
 
+  if (idActividadEditando) {
+    payload.id = idActividadEditando;
+  }
+
   try {
-    const res = await fetch('https://actividades-fmax.vercel.app/api/crear-actividad', {
+    const res = await fetch('https://actividades-fmax.vercel.app/api/activida-propia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
     if (res.ok) {
-      alert('Actividad registrada correctamente');
+      alert(idActividadEditando ? 'Actividad actualizada correctamente' : 'Actividad registrada correctamente');
       window.location.href = '../index.html';
     } else {
       alert('Error al guardar la actividad');
@@ -342,6 +415,6 @@ async function guardarActividad(e) {
     alert('Error de conexión');
   }
 }
-  </script>
+</script>
 </body>
 </html>

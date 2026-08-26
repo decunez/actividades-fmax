@@ -151,6 +151,7 @@
             <th>Pt. Red</th>
             <th>AC</th>
             <th>Total ($)</th>
+            <th>ACCIONES</th>
           </tr>
         </thead>
         <tbody id="tabla-body">
@@ -356,20 +357,29 @@
           else if (item.tipo_actividad === 'TRASLADO') badgeClass += ' badge-traslado';
           else if (item.tipo_actividad === 'VISITA') badgeClass += ' badge-visita';
 
-          tbody.innerHTML += `
-            <tr>
-              <td>${fechaFormateada}</td>
-              <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
-              <td>${item.cliente || 'NO DEFINIDO'}</td>
-              <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
-              <td>${item.forma_actividad}</td>
-              <td>${item.cantidad_fibra || 0} m</td>
-              <td>${item.punto_red || 0}</td>
-              <td>${item.ac || 0}</td>
-              <td style="font-weight: 600; color: #10b981;">$${totalNum.toFixed(2)}</td>
-            </tr>
-          `;
-        });
+          // 1. Determinar la página de destino según la cuadrilla
+  const esPropia = (item.cuadrilla || 'PROPIA') === 'PROPIA';
+  const paginaDestino = esPropia ? 'actividad-propia.html' : 'actividad-externa.html';
+
+tbody.innerHTML += `
+    <tr>
+      <td>${fechaFormateada}</td>
+      <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
+      <td>${item.cliente || 'NO DEFINIDO'}</td>
+      <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
+      <td>${item.forma_actividad}</td>
+      <td>${item.cantidad_fibra || 0} m</td>
+      <td>${item.punto_red || 0}</td>
+      <td>${item.ac || 0}</td>
+      <td style="font-weight: 600; color: #10b981;">$${totalNum.toFixed(2)}</td>
+      <td>
+        <button class="btn-edit" onclick="editarActividad(${JSON.stringify(item).replace(/"/g, '&quot;')}, '${paginaDestino}')">
+          ✏️ Editar
+        </button>
+      </td>
+    </tr>
+  `;
+});
 
         document.getElementById('kpi-registros').textContent = data.length;
         document.getElementById('kpi-cant-act').textContent = totalCantAct;
@@ -399,6 +409,14 @@
       document.getElementById('kpi-ac-cant').textContent = '0';
       document.getElementById('kpi-ac-val').textContent = '$0.00';
     }
+
+
+    function editarActividad(actividad, paginaDestino) {
+  // Guarda los datos temporalmente
+  localStorage.setItem('actividadEditando', JSON.stringify(actividad));
+  // Redirige al formulario adecuado
+  window.location.href = paginaDestino;
+}
 
 
 function generarReportePDF() {
