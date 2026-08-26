@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script>
+    // Validar si existe la sesión en el navegador
+    const usuarioSesion = localStorage.getItem('usuarioSesion');
+    
+    if (!usuarioSesion) {
+      // Redirigir al login si no ha iniciado sesión
+      window.location.href = 'login.html'; // o '../index.html' según dónde esté tu vista de login
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrar Actividad Externa - Sistema FMAX</title>
@@ -11,26 +20,10 @@
 </head>
 <body>
 
-  <nav class="navbar">
-<div class="nav-brand">
-    <span class="logo-text">Actividades</span>
-    <span class="user-pill" id="nombre-usuario">FMAX</span>
-  </div>
-
-  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="index.html" class="active">Inicio</a></li>
-      <li><a href="actividades.html">Actividades</a></li>
-      <li><a href="#">Reportes</a></li>
-      <li><a href="usuarios.html">Configuración</a></li>
-    </ul>
-  </nav>
-
   <main class="container">
     <section class="header-section" style="text-align: center; margin-bottom: 2rem;">
      <div>
       <h1>Registrar Actividad Externa</h1>
-      <p style="color: var(--text-muted);">Registro de actividades de cuadrillas externas</p>
       </div>
     </section>
 

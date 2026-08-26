@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script>
+    // Validar si existe la sesión en el navegador
+    const usuarioSesion = localStorage.getItem('usuarioSesion');
+    
+    if (!usuarioSesion) {
+      // Redirigir al login si no ha iniciado sesión
+      window.location.href = 'login.html'; // o '../index.html' según dónde esté tu vista de login
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Usuarios - Sistema FMAX</title>
@@ -8,62 +17,35 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <!-- Estilos globales -->
   <link rel="stylesheet" href="../css/styles.css">
-  <style>
-    /* Estilos específicos para la tabla de usuarios */
-    .table-container {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow-x: auto;
-    }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th, td {
-      padding: 1rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      background-color: rgba(255, 255, 255, 0.03);
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background-color: rgba(255, 255, 255, 0.02);
-    }
-
-    .loading-cell {
-      text-align: center;
-      color: var(--text-muted);
-      padding: 2rem;
-    }
-  </style>
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="brand">Actividades <span id="nombre-usuario">FMAX</span></div>
-    <button class="menu-toggle" id="menuToggle">☰</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="index.html" class="active">Inicio</a></li>
-      <li><a href="usuarios.html">Usuarios</a></li>
-      <li><a href="html/actividades.html">Actividades</a></li>
-      <li><a href="reportes.html">Reportes</a></li>
-      <li><a href="configuracion.html">Configuración</a></li>
-    </ul>
-  </nav>
+<nav class="navbar">
+  <div class="user-container">
+  <h2>Actividades</h2>
+  <span id="user-badge" class="user-pill">Cargando...</span>
+</div>
+
+  <!-- Enlaces Principales -->
+  <div class="nav-links">
+    <a href="index.html" class="nav-link active">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Inicio</span>
+    </a>
+    <a href="actividades.html" class="nav-link">Actividades</a>
+    <a href="#" class="nav-link">Reportes</a>
+    <a href="usuarios.html" class="nav-link">Configuracion</a>
+  </div>
+
+  <!-- Botón Cerrar Sesión -->
+  <div class="nav-actions">
+    <button onclick="cerrarSesion()" class="btn-logout">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+</nav>
 
   <!-- Contenido Principal -->
   <main class="container">
@@ -97,11 +79,29 @@
   </main>
 
   <!-- Pie de página -->
-  <footer>
-    <p>&copy; 2026 Sistema FMAX - Todos los derechos reservados</p>
-  </footer>
+<footer style="text-align: center;">
+  <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
+</footer>
 
   <!-- Enlace a la lógica dinámica -->
   <script src="../script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  const usuarioSesion = localStorage.getItem('usuarioSesion');
+
+  if (usuarioSesion) {
+    const user = JSON.parse(usuarioSesion);
+    
+    // Busca el campo del nombre en la respuesta del backend
+    const nombreUsuario = user.nombre || user.nombre_completo || user.usuario || 'Usuario';
+    
+    // Asigna el texto a la etiqueta
+    const badge = document.getElementById('user-badge');
+    if (badge) {
+      badge.textContent = nombreUsuario;
+    }
+  }
+});
+  </script>
 </body>
 </html>
