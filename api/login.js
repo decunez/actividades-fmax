@@ -1,34 +1,45 @@
-import { mysql } from '@tidbcloud/serverless'; // O la librería de conexión que uses en tus otras APIs (mysql2, etc.)
+import { connect } from '@tidbcloud/serverless';
 
 export default async function handler(req, res) {
-  // Permitir CORS
+  // Configuración global de CORS
+  res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,PUT,DELETE');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+  // Responder inmediatamente solicitudes PREFLIGHT (OPTIONS)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-  const { usuario, password } = req.body;
-
-  if (!usuario || !password) {
-    return res.status(400).json({ error: 'Por favor, ingrese usuario y contraseña' });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método no permitido' });
   }
 
   try {
-    // Usa la misma lógica de conexión de tus otros archivos de /api
-    const connection = mysql.createConnection(process.env.DATABASE_URL);
+    const { usuario, password } = req.body || {};
 
-    const [rows] = await connection.query(
+    if (!usuario || !password) {
+      return res.status(400).json({ error: 'Por favor, ingrese usuario y contraseña' });
+    }
+
+    // Conexión a TiDB
+    const conn = connect({ url: process.env.DATABASE_URL });
+    const result = await conn.execute(
       'SELECT id, nombre, usuario, sector FROM actividades.usuarios WHERE usuario = ? AND password = ?',
       [usuario, password]
     );
 
-    if (rows.length === 0) {
+    const users = Array.isArray(result) ? result : (result.rows || []);
+
+    if (users.length === 0) {
       return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     }
 
-    const user = rows[0];
+    const user = users[0];
 
     return res.status(200).json({
       success: true,
@@ -42,7 +53,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error en login:', error);
-    return res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error en API Login:', error);
+    return res.status(500).json({ error: 'Error en el servidor: ' + error.message });
   }
 }
