@@ -11,8 +11,12 @@
 <body>
 
   <nav class="navbar">
-    <div class="brand">Actividades <span id="nombre-usuario">FMAX</span></div>
-    <button class="menu-toggle" id="menuToggle">☰</button>
+    <div class="nav-brand">
+    <span class="logo-text">Actividades</span>
+    <span class="user-pill" id="nombre-usuario">FMAX</span>
+  </div>
+
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
     <ul class="nav-links" id="navLinks">
       <li><a href="index.html" class="active">Inicio</a></li>
       <li><a href="html/actividades.html">Actividades</a></li>
@@ -30,9 +34,11 @@
 
       <div class="action-buttons">
         <select id="periodo-dash" class="periodo-selector">
-          <option value="2026-07-26|2026-08-25" selected>Ago (26 Jul - 25 Ago 2026)</option>
-          <option value="2026-06-26|2026-07-25">Jul (25 Jun - 25 Jul 2026)</option>
-          <option value="2026-05-26|2026-06-25">May (26 May - 25 Jun 2026)</option>
+            <option value="2026-07-26|2026-08-25">Ago (26 Jul 2026 - 25 Ago 2026)</option>
+            <option value="2026-08-26|2026-09-25" selected>Sep (26 Ago 2026 - 25 Sep 2026)</option>
+            <option value="2026-09-26|2026-10-25">Oct (26 Sep 2026 - 25 Oct 2026)</option>
+            <option value="2026-10-26|2026-11-25">Nov (26 Oct 2026 - 25 Nov 2026)</option>
+            <option value="2026-11-26|2026-12-25">Dic (26 Nov 2026 - 25 Dic 2026)</option>
         </select>
         <a href="html/actividad-propia.html" class="btn-primary" style="text-decoration:none;">+ Actividad Propia</a>
         <a href="html/actividad-externa.html" class="btn-secondary" style="text-decoration:none;">+ Actividad Externa</a>
@@ -109,9 +115,9 @@
     </div>
   </main>
 
-  <footer>
-    <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
-  </footer>
+<footer style="text-align: center;">
+  <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
+</footer>
 
   <!-- Script Principal y Lógica del Dashboard -->
   <script src="script.js"></script>

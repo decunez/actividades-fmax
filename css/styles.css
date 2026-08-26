@@ -2,13 +2,13 @@
    1. VARIABLES GLOBALES Y TEMA
    ========================================== */
 :root {
-  --bg-primary: #0b0f19;
-  --bg-surface: #0b0f19;
-  --border: #232d42;
+  --bg-primary: #ffffffd5;
+  --bg-surface: #ffffff;
+  --border: #575757;
   --radius: 8px;
-  --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
-  --accent: #6366f1;
+  --text-main: #000000;
+  --text-muted: #030303;
+  --accent: #2b39f3;
   --accent-hover: #4f46e5;
   --success: #10b981;
 }
@@ -34,12 +34,70 @@ body {
    3. NAVBAR Y NAVEGACIÓN GLOBAL
    ========================================== */
 .navbar {
-  background-color: var(--bg-surface);
-  border-bottom: 1px solid var(--border);
-  padding: 1rem 2rem;
+  background-color: rgba(15, 23, 42, 0.9); /* Oscuro elegante con transparencia */
+  backdrop-filter: blur(12px); /* Efecto cristal/blur */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.75rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Marca y etiqueta de usuario */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  color: #000000;
+  font-size: 1.1rem;
+}
+
+.user-pill {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Lista de navegación */
+.nav-links {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover suave */
+.nav-links a:hover {
+  color: #f8fafc;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Link activo con destello */
+.nav-links a.active {
+  color: #ffffff;
+  background-color: #4f46e5;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.35);
 }
 
 .brand {
@@ -190,7 +248,7 @@ body {
 
     .kpi-title {
       font-size: 0.78rem;
-      color: var(--text-muted, #94a3b8);
+      color: var(--text-muted, #000000);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -204,7 +262,7 @@ body {
 
     .kpi-sub {
       font-size: 0.8rem;
-      color: var(--text-muted, #94a3b8);
+      color: var(--text-muted, #b8a494);
     }
 
     .panels-grid {
@@ -215,7 +273,7 @@ body {
     }
 
     .panel-card {
-      background: var(--bg-surface, #1e293b);
+      background: var(--bg-surface, #3b1e2a);
       border: 1px solid var(--border, #334155);
       border-radius: 12px;
       padding: 1.25rem;
@@ -235,7 +293,7 @@ body {
       justify-content: space-between;
       align-items: center;
       padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(204, 236, 23, 0.05);
     }
 
     .stat-row:last-child {
@@ -243,7 +301,7 @@ body {
     }
 
     .table-container {
-      background-color: var(--bg-surface, #1e293b);
+      background-color: var(--bg-surface, #253b1e);
       border: 1px solid var(--border, #334155);
       border-radius: 12px;
       overflow-x: auto;
@@ -374,14 +432,14 @@ body.generating-pdf td {
 
 .nav-links a:hover,
 .nav-links a.active {
-  color: #ffffff;
+  color: #141111;
 }
 
 .menu-toggle {
   display: none; /* Oculto en computadoras */
   background: transparent;
   border: none;
-  color: #ffffff;
+  color: #181616;
   font-size: 1.6rem;
   cursor: pointer;
   padding: 0.25rem;

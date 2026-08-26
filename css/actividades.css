@@ -98,7 +98,7 @@
     }
 
     th {
-      background-color: rgba(255, 255, 255, 0.03);
+      background-color: rgba(123, 211, 130, 0.03);
       color: var(--text-muted);
       font-weight: 600;
       text-transform: uppercase;
@@ -107,7 +107,7 @@
     }
 
     tr:hover {
-      background-color: rgba(255, 255, 255, 0.02);
+      background-color: rgba(211, 247, 115, 0.02);
     }
 
     .badge {
@@ -141,3 +141,80 @@
     .badge-instalacion { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
     .badge-traslado { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
     .badge-visita { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+    .btn-edit {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.btn-edit:hover {
+  background-color: #2563eb;
+}
+
+/* Estilos en pantalla */
+.report-header {
+  margin-bottom: 1.5rem;
+}
+
+.report-meta {
+  display: flex;
+  gap: 2rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.report-table th {
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.report-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.report-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* Reglas de impresión / PDF */
+@media print {
+  /* Evita repetir el thead en cada página */
+  thead {
+    display: table-row-group;
+  }
+
+  /* Fijar el pie de página al final de la hoja */
+  .report-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+}

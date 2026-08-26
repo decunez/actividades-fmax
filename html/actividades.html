@@ -5,26 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Listado de Actividades</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <!-- Librería para convertir HTML a PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<!-- jsPDF y AutoTable para generación limpia de PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  
+  <!-- jsPDF y AutoTable para generación de PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  
   <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="../css/actividades.css">
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="brand">Actividades <span id="nombre-usuario">FMAX</span></div>
-    <button class="menu-toggle" id="menuToggle">☰</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="../index.html" class="active">Inicio</a></li>
-      <li><a href="actividades.html">Actividades</a></li>
-      <li><a href="#">Reportes</a></li>
-      <li><a href="usuarios.html">Configuracion</a></li>
-    </ul>
-  </nav>
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="logo-text">Actividades</span>
+    <span class="user-pill" id="nombre-usuario">FMAX</span>
+  </div>
+
+  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="../index.html">Inicio</a></li>
+    <li><a href="actividades.html" class="active">Actividades</a></li>
+    <li><a href="#">Reportes</a></li>
+    <li><a href="usuarios.html">Configuracion</a></li>
+  </ul>
+</nav>
 
   <main class="container">
     <section class="header-section">
@@ -33,13 +38,13 @@
         <p style="color: var(--text-muted);">Consulta y filtrado de registros</p>
       </div>
 
-<div class="header-actions">
-  <button onclick="generarReportePDF()" class="btn-pdf">
-    📄 Exportar PDF
-  </button>
-  <a href="actividad-propia.html" class="btn-primary">+ Actividad Propia</a>
-  <a href="actividad-externa.html" class="btn-secondary">+ Actividad Externa</a>
-</div>
+      <div class="header-actions">
+        <button onclick="generarReportePDF()" class="btn-pdf">
+          📄 Exportar PDF
+        </button>
+        <a href="actividad-propia.html" class="btn-primary">+ Actividad Propia</a>
+        <a href="actividad-externa.html" class="btn-secondary">+ Actividad Externa</a>
+      </div>
     </section>
 
     <!-- Filtros -->
@@ -49,8 +54,8 @@
           <label for="periodo">1. Seleccionar Período (2026)</label>
           <select id="periodo" class="form-control">
             <option value="">-- SELECCIONE PERÍODO --</option>
-            <option value="2026-07-26|2026-08-25" selected>Ago (26 Jul 2026 - 25 Ago 2026)</option>
-            <option value="2026-08-26|2026-09-25">Sep (26 Ago 2026 - 25 Sep 2026)</option>
+            <option value="2026-07-26|2026-08-25">Ago (26 Jul 2026 - 25 Ago 2026)</option>
+            <option value="2026-08-26|2026-09-25" selected>Sep (26 Ago 2026 - 25 Sep 2026)</option>
             <option value="2026-09-26|2026-10-25">Oct (26 Sep 2026 - 25 Oct 2026)</option>
             <option value="2026-10-26|2026-11-25">Nov (26 Oct 2026 - 25 Nov 2026)</option>
             <option value="2026-11-26|2026-12-25">Dic (26 Nov 2026 - 25 Dic 2026)</option>
@@ -101,8 +106,6 @@
             <option value="TODOS">TODOS LOS SECTORES</option>
           </select>
         </div>
-
-
       </div>
     </div>
 
@@ -156,7 +159,7 @@
         </thead>
         <tbody id="tabla-body">
           <tr>
-            <td colspan="9" style="text-align: center; color: var(--text-muted);">Cargando registros...</td>
+            <td colspan="10" style="text-align: center; color: var(--text-muted);">Cargando registros...</td>
           </tr>
         </tbody>
       </table>
@@ -174,12 +177,22 @@
     const inputCuadrillaEspecifica = document.getElementById('cuadrilla_especifica');
     const inputSector = document.getElementById('sector');
 
+    // Variable global para almacenar los registros cargados y usarlos en el PDF
+    let actividadesCargadas = [];
+
     document.addEventListener('DOMContentLoaded', async () => {
+      // Toggle Menú Móvil
+      const menuToggle = document.getElementById('menuToggle');
+      const navLinks = document.getElementById('navLinks');
+      if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+      }
+
       await Promise.all([cargarSectores(), cargarCuadrillasExternas()]);
       evaluarEstadoFiltros();
       cargarActividades();
 
-      // Evento Periodo
+      // Eventos de filtros
       inputPeriodo.addEventListener('change', () => {
         evaluarEstadoFiltros();
         inputFecha.value = '';
@@ -192,17 +205,14 @@
           cargarActividades();
         } else {
           resetearKPIs();
-          document.getElementById('tabla-body').innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
+          actividadesCargadas = [];
+          document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
         }
       });
 
-      // Filtro Fecha Exacta
       inputFecha.addEventListener('change', cargarActividades);
-
-      // Filtro Tipo Actividad
       inputTipo.addEventListener('change', cargarActividades);
 
-      // Filtro Origen Cuadrilla (PROPIA / EXTERNA / TODOS)
       inputTipoCuadrilla.addEventListener('change', () => {
         if (inputTipoCuadrilla.value === 'EXTERNA') {
           inputCuadrillaEspecifica.disabled = false;
@@ -213,15 +223,11 @@
         cargarActividades();
       });
 
-      // Filtro Cuadrilla Especifica
       inputCuadrillaEspecifica.addEventListener('change', cargarActividades);
-
-      // Filtro Sector
       inputSector.addEventListener('change', cargarActividades);
 
-      // Botón Limpiar
       document.getElementById('btn-limpiar').addEventListener('click', () => {
-        inputPeriodo.value = '2026-07-25|2026-08-26';
+        inputPeriodo.value = '2026-08-26|2026-09-25';
         inputFecha.value = '';
         inputTipo.value = 'TODOS';
         inputTipoCuadrilla.value = 'TODOS';
@@ -298,9 +304,7 @@
         params.append('fecha_fin', fFin);
       }
 
-      if (inputTipo.value !== 'TODOS') {
-        params.append('tipo_actividad', inputTipo.value);
-      }
+      if (inputTipo.value !== 'TODOS') params.append('tipo_actividad', inputTipo.value);
 
       if (inputTipoCuadrilla.value !== 'TODOS') {
         params.append('tipo_cuadrilla', inputTipoCuadrilla.value);
@@ -309,22 +313,23 @@
         }
       }
 
-      if (inputSector.value !== 'TODOS') {
-        params.append('sector', inputSector.value);
-      }
+      if (inputSector.value !== 'TODOS') params.append('sector', inputSector.value);
 
       const tbody = document.getElementById('tabla-body');
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Cargando...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Cargando...</td></tr>';
 
       try {
         const res = await fetch(`${API_BASE}?${params.toString()}`);
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
           resetearKPIs();
+          actividadesCargadas = [];
           return;
         }
+
+        actividadesCargadas = data; // Guarda en memoria para exportar a PDF
 
         let sumaMonto = 0;
         let totalCantAct = 0;
@@ -357,29 +362,28 @@
           else if (item.tipo_actividad === 'TRASLADO') badgeClass += ' badge-traslado';
           else if (item.tipo_actividad === 'VISITA') badgeClass += ' badge-visita';
 
-          // 1. Determinar la página de destino según la cuadrilla
-  const esPropia = (item.cuadrilla || 'PROPIA') === 'PROPIA';
-  const paginaDestino = esPropia ? 'actividad-propia.html' : 'actividad-externa.html';
+          const esPropia = (item.cuadrilla || 'PROPIA') === 'PROPIA';
+          const paginaDestino = esPropia ? 'actividad-propia.html' : 'actividad-externa.html';
 
-tbody.innerHTML += `
-    <tr>
-      <td>${fechaFormateada}</td>
-      <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
-      <td>${item.cliente || 'NO DEFINIDO'}</td>
-      <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
-      <td>${item.forma_actividad}</td>
-      <td>${item.cantidad_fibra || 0} m</td>
-      <td>${item.punto_red || 0}</td>
-      <td>${item.ac || 0}</td>
-      <td style="font-weight: 600; color: #10b981;">$${totalNum.toFixed(2)}</td>
-      <td>
-        <button class="btn-edit" onclick="editarActividad(${JSON.stringify(item).replace(/"/g, '&quot;')}, '${paginaDestino}')">
-          ✏️ Editar
-        </button>
-      </td>
-    </tr>
-  `;
-});
+          tbody.innerHTML += `
+            <tr>
+              <td>${fechaFormateada}</td>
+              <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
+              <td>${item.cliente || 'NO DEFINIDO'}</td>
+              <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
+              <td>${item.forma_actividad}</td>
+              <td>${item.cantidad_fibra || 0} m</td>
+              <td>${item.punto_red || 0}</td>
+              <td>${item.ac || 0}</td>
+              <td style="font-weight: 600; color: #10b981;">$${totalNum.toFixed(2)}</td>
+              <td>
+                <button class="btn-edit" onclick="editarActividad(${JSON.stringify(item).replace(/"/g, '&quot;')}, '${paginaDestino}')">
+                  ✏️ Editar
+                </button>
+              </td>
+            </tr>
+          `;
+        });
 
         document.getElementById('kpi-registros').textContent = data.length;
         document.getElementById('kpi-cant-act').textContent = totalCantAct;
@@ -393,8 +397,9 @@ tbody.innerHTML += `
 
       } catch (err) {
         console.error(err);
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
         resetearKPIs();
+        actividadesCargadas = [];
       }
     }
 
@@ -410,86 +415,151 @@ tbody.innerHTML += `
       document.getElementById('kpi-ac-val').textContent = '$0.00';
     }
 
-
     function editarActividad(actividad, paginaDestino) {
-  // Guarda los datos temporalmente
-  localStorage.setItem('actividadEditando', JSON.stringify(actividad));
-  // Redirige al formulario adecuado
-  window.location.href = paginaDestino;
-}
+      localStorage.setItem('actividadEditando', JSON.stringify(actividad));
+      window.location.href = paginaDestino;
+    }
 
-
+// Generador de PDF Ajustado con Resumen e Indicadores KPI
 function generarReportePDF() {
+  if (!actividadesCargadas || actividadesCargadas.length === 0) {
+    alert("No hay datos para generar el reporte.");
+    return;
+  }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 
-  // Encabezado del documento
+  // 1. Título principal
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
+  doc.setFontSize(15);
   doc.setTextColor(15, 23, 42);
-  doc.text('REPORTE DETALLADO DE ACTIVIDADES', 40, 40);
+  doc.text('REPORTE DE ACTIVIDADES', 40, 32);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
+
   const fechaHoy = new Date().toLocaleDateString('es-ES', { 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric' 
   });
-  doc.text(`Fecha de emisión: ${fechaHoy}`, 40, 54);
+
+  const comboPeriodo = document.getElementById('periodo');
+  const periodoTexto = comboPeriodo.options[comboPeriodo.selectedIndex] ? comboPeriodo.options[comboPeriodo.selectedIndex].text : '-';
+
+  doc.text(`Fecha de emisión: ${fechaHoy}`, 40, 45);
+  doc.text(`Período: ${periodoTexto}`, 40, 56);
+
+  // 2. Cálculo de métricas para el encabezado
+  let totalCantAct = 0;
+  let totalExcedente = 0;
+  let totalPtRed = 0;
+  let totalAC = 0;
+
+  actividadesCargadas.forEach(item => {
+    const cantParsed = parseInt(item.cantidad_act, 10);
+    totalCantAct += (!isNaN(cantParsed) && cantParsed > 0) ? cantParsed : 1;
+    totalExcedente += parseInt(item.exedente) || 0;
+    totalPtRed += parseInt(item.punto_red) || 0;
+    totalAC += parseInt(item.ac) || 0;
+  });
+
+  // Resumen KPI en el encabezado
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text(
+    `Total Actividades: ${totalCantAct}   |   Excedente: ${totalExcedente} m   |   Puntos de Red: ${totalPtRed}   |   Equipos AC: ${totalAC}`, 
+    40, 
+    70
+  );
 
   // Línea divisoria
   doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(1);
-  doc.line(40, 62, 802, 62);
+  doc.line(40, 76, 802, 76);
 
-  // AutoTable: Construye la tabla leyendo el HTML directamente
+  // 3. Estructura de cabeceras de la tabla (Columna 'Cant.' junto a '#')
+  const head = [['#', 'Cant.', 'Fecha', 'Cuadrilla', 'Cliente', 'Tipo', 'Forma', 'Fibra', 'Excedente', 'Pt. Red', 'AC']];
+
+  // Map de filas
+  const body = actividadesCargadas.map((item, index) => {
+    const fechaFormateada = item.fecha ? item.fecha.toString().substring(0, 10) : '-';
+    const cantAct = parseInt(item.cantidad_act, 10) || 1;
+    const fibra = parseInt(item.cantidad_fibra) || 0;
+    const excedente = parseInt(item.exedente) || 0;
+
+    return [
+      index + 1,
+      cantAct,
+      fechaFormateada,
+      item.cuadrilla || 'PROPIA',
+      item.cliente || 'NO DEFINIDO',
+      item.tipo_actividad || '',
+      item.forma_actividad || '',
+      `${fibra} m`,
+      `${excedente} m`,
+      item.punto_red || 0,
+      item.ac || 0
+    ];
+  });
+
+  // 4. Renderizado con AutoTable
   doc.autoTable({
-    html: '#tablaActividades',
-    startY: 75,
-    margin: { left: 40, right: 40 },
+    head: head,
+    body: body,
+    startY: 85,
+    margin: { left: 40, right: 40, bottom: 45 },
     theme: 'grid',
+    showHead: 'firstPage', // Mantiene el encabezado solo en la primera página
     headStyles: {
-      fillColor: [21, 28, 44], // Tono oscuro (#151c2c) acorde a tu diseño
+      fillColor: [21, 28, 44],
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 8.5,
+      fontSize: 8,
       halign: 'center'
     },
     bodyStyles: {
-      fontSize: 8,
+      fontSize: 7.5,
       textColor: [51, 65, 85]
     },
     columnStyles: {
-      0: { halign: 'center' }, // Fecha
-      1: { halign: 'center' }, // Cuadrilla
-      2: { halign: 'left' },   // Cliente
-      3: { halign: 'center' }, // Tipo
-      4: { halign: 'center' }, // Forma
-      5: { halign: 'right' },  // Fibra
-      6: { halign: 'center' }, // Pt. Red
-      7: { halign: 'center' }, // AC
-      8: { halign: 'right', fontStyle: 'bold' } // Total ($)
+      0: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }, // # Conteo
+      1: { halign: 'center', cellWidth: 35, fontStyle: 'bold' }, // Cantidad Actividad
+      2: { halign: 'center', cellWidth: 60 },                   // Fecha
+      3: { halign: 'center', cellWidth: 65 },                   // Cuadrilla
+      4: { halign: 'left', cellWidth: 200 },                                     // Cliente
+      5: { halign: 'center', cellWidth: 70 },                   // Tipo
+      6: { halign: 'center', cellWidth: 120 },                   // Forma
+      7: { halign: 'right', cellWidth: 45 },                    // Fibra
+      8: { halign: 'right', cellWidth: 50 },                    // Excedente
+      9: { halign: 'center', cellWidth: 40 },                   // Pt. Red
+      10: { halign: 'center', cellWidth: 30 }                   // AC
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252]
     },
     didDrawPage: function (data) {
-      // Numeración de páginas
+      const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+      const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
+
       doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
       doc.setTextColor(148, 163, 184);
-      doc.text(
-        `Página ${data.pageNumber}`,
-        doc.internal.pageSize.width - 60,
-        doc.internal.pageSize.height - 20
-      );
+
+      // Pie de página del PDF
+      doc.text('© 2026 Daniel Cuñez - Todos los derechos reservados', 40, pageHeight - 20);
+      doc.text(`Página ${data.pageNumber}`, pageWidth - 75, pageHeight - 20);
     }
   });
 
   doc.save(`Reporte_Actividades_${new Date().toISOString().split('T')[0]}.pdf`);
 }
-
   </script>
+
+<footer style="text-align: center; margin-top: 2rem; padding: 1rem; color: var(--text-muted); font-size: 0.85rem;">
+  <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
+</footer>
 </body>
 </html>
