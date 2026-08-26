@@ -151,7 +151,7 @@ body {
 }
 
 /* ==========================================
-   4. COMPONENTES DEL DASHBOARD
+   4. COMPONENTES DEL DASHBOARD Y FILTROS
    ========================================== */
 .header-section {
   display: flex;
@@ -185,10 +185,56 @@ body {
   cursor: pointer;
 }
 
+.filter-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.form-control {
+  padding: 0.75rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: 6px;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.form-control:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.form-control:focus:not(:disabled) {
+  border-color: var(--accent);
+}
+
 /* Métricas KPI */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.25rem;
   margin-bottom: 2rem;
 }
@@ -209,7 +255,7 @@ body {
 .kpi-card.orange { border-left-color: #f59e0b; }
 .kpi-card.purple { border-left-color: #8b5cf6; }
 
-.kpi-title {
+.kpi-title, .kpi-card span {
   font-size: 0.78rem;
   color: var(--text-muted);
   font-weight: 600;
@@ -217,58 +263,26 @@ body {
   letter-spacing: 0.5px;
 }
 
-.kpi-value {
+.kpi-value, .kpi-card strong {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-main);
 }
 
-.kpi-sub {
+.kpi-sub, .kpi-card small {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
 
-/* Paneles y Tablas */
-.panels-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.panel-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.25rem;
-}
-
-.panel-card h3 {
-  font-size: 1.05rem;
-  margin-bottom: 1rem;
-  color: var(--text-main);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.stat-row:last-child {
-  border-bottom: none;
-}
-
+/* ==========================================
+   5. DISEÑO DE TABLA LIMPIA Y MODERNA
+   ========================================== */
 .table-container {
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 table {
@@ -276,41 +290,82 @@ table {
   border-collapse: collapse;
   text-align: left;
   font-size: 0.88rem;
+  min-width: 600px; /* Previene la compresión de columnas en móviles */
 }
 
 th, td {
-  padding: 0.85rem 1rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 th {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: #f8fafc;
   color: var(--text-muted);
   font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  color: #334155;
+}
+
+td strong, .td-cuadrilla {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover {
+  background-color: rgba(241, 245, 249, 0.5);
+}
+
+/* Insignias (Badges) */
+.badge, .badge-tag {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
-.badge-tag {
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: rgba(59, 130, 246, 0.15);
+.badge-instalacion {
+  background-color: #dbeafe;
   color: #2563eb;
 }
 
+.badge-traslado {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.badge-visita {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
 /* ==========================================
-   5. BOTONES Y UTILIDADES
+   6. BOTONES Y UTILIDADES
    ========================================== */
 .btn-primary,
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
+.btn-secondary,
+.btn-pdf {
+  padding: 0.65rem 1.25rem;
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   transition: all 0.2s ease;
 }
 
@@ -333,15 +388,39 @@ th {
   background-color: #f1f5f9;
 }
 
+.btn-pdf {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-pdf:hover {
+  background-color: #dc2626;
+}
+
+.btn-edit {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.btn-edit:hover {
+  background-color: #2563eb;
+}
+
 .hidden {
   display: none !important;
 }
 
 /* ==========================================
-   6. RESPONSIVO OPTIMIZADO PARA MÓVILES
+   7. OPTIMIZACIÓN MÓVIL RESPONSIVA
    ========================================== */
 @media (max-width: 768px) {
-  /* Navbar fija en la parte superior con desenfoque */
   .navbar {
     position: sticky;
     top: 0;
@@ -360,7 +439,6 @@ th {
 
   .hamburger-btn {
     display: block;
-    padding: 0.25rem 0.5rem;
   }
 
   .nav-content {
@@ -384,11 +462,11 @@ th {
     gap: 0.4rem;
   }
 
-  /* Área táctil amplia (48px) para interacción cómoda en móviles */
   .nav-link, 
   .btn-logout,
   .btn-primary,
   .btn-secondary,
+  .btn-pdf,
   .periodo-selector {
     width: 100%;
     min-height: 48px;
@@ -396,99 +474,27 @@ th {
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 0.95rem;
   }
 
-  .header-section {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
   }
 
-  .action-buttons {
-    flex-direction: column;
-    width: 100%;
-    gap: 0.75rem;
-  }
-
-  /* Matriz 2x2 en KPIs para sintetizar información sin scroll excesivo */
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
-    margin-bottom: 1.5rem;
   }
 
-  .kpi-card {
-    padding: 0.85rem;
-    border-left-width: 3px;
-  }
-
-  .kpi-title {
-    font-size: 0.7rem;
-  }
-
-  .kpi-value {
-    font-size: 1.35rem;
-  }
-
-  .kpi-sub {
-    font-size: 0.7rem;
-    line-height: 1.2;
-  }
-
-  /* Transformación de tabla estática a tarjetas móviles (Fichas) */
+  /* Desplazamiento horizontal fluido sin romper la tabla */
   .table-container {
-    background: transparent;
-    border: none;
-  }
-
-  .table-container table, 
-  .table-container thead, 
-  .table-container tbody, 
-  .table-container th, 
-  .table-container td, 
-  .table-container tr { 
-    display: block; 
-  }
-
-  .table-container thead {
-    display: none;
-  }
-
-  .table-container tr {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 0.75rem;
-    padding: 0.85rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
-  }
-
-  .table-container td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.45rem 0;
-    border-bottom: 1px solid #f1f5f9;
-    white-space: normal;
-    font-size: 0.85rem;
-  }
-
-  .table-container td:last-child {
-    border-bottom: none;
-  }
-
-  .table-container td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
+    border-radius: 8px;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
 /* ==========================================
-   7. GENERACIÓN DE PDF / IMPRESIÓN
+   8. GENERACIÓN DE PDF / IMPRESIÓN
    ========================================== */
 body.generating-pdf {
   background-color: #ffffff !important;
@@ -508,15 +514,6 @@ body.generating-pdf .navbar {
   display: none !important;
 }
 
-body.generating-pdf .kpi-card,
-body.generating-pdf .form-card,
-body.generating-pdf .card {
-  background: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
-  color: #0f172a !important;
-  box-shadow: none !important;
-}
-
 body.generating-pdf table {
   width: 100% !important;
   color: #0f172a !important;
@@ -532,4 +529,171 @@ body.generating-pdf th {
 body.generating-pdf td {
   border-bottom: 1px solid #e2e8f0 !important;
   color: #334155 !important;
+}
+
+@media print {
+  thead {
+    display: table-row-group;
+  }
+
+  .report-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.stat-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.stat-amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.stat-amount.green {
+  color: #10b981;
+}
+
+.stat-amount.blue {
+  color: #3b82f6;
+}
+
+/* ==========================================
+   CORRECCIÓN DE PANELES Y BADGES
+   ========================================== */
+
+/* Contenedor en cuadrícula para los 2 paneles */
+.panels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.panel-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.panel-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-main);
+}
+
+/* Fila dividida en 2 lados: Izquierda (Detalle) y Derecha (Monto) */
+.stat-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+/* Alinea el texto a la izquierda sin estirar los elementos */
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Evita que el badge o texto ocupen el 100% de ancho */
+  gap: 0.2rem;
+}
+
+.stat-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Montos alineados a la derecha */
+.stat-amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+.stat-amount.green {
+  color: #10b981;
+}
+
+.stat-amount.blue {
+  color: #3b82f6;
+}
+
+/* Ajuste compacto para las insignias */
+.badge {
+  display: inline-flex !important;
+  width: fit-content !important; /* Fuerza al badge a acoplarse solo al tamaño del texto */
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.badge-instalacion { background-color: #dbeafe; color: #2563eb; }
+.badge-traslado { background-color: #fef3c7; color: #d97706; }
+.badge-visita { background-color: #d1fae5; color: #059669; }
+.badge-tag { background-color: #f1f5f9; color: #475569; }
+
+/* Fuerza la separación vertical en cualquier pantalla móvil o contenedor */
+@media (max-width: 768px) {
+
+  /* Contenedor principal de acciones */
+  .action-buttons,
+  .header-section > div:last-child {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+    margin-top: 1rem !important;
+  }
+
+  /* Target directo a los enlaces y botones de la sección */
+  .action-buttons a,
+  .action-buttons button,
+  .action-buttons .btn-primary,
+  .action-buttons .btn-secondary,
+  .action-buttons .btn-pdf,
+  a.btn-primary,
+  a.btn-secondary {
+    display: flex !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 12px !important; /* Separación forzada por elemento */
+    padding: 0.75rem 1rem !important;
+    min-height: 48px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+  }
+
+  /* Quita el margen al último botón para no empujar el filtro de abajo */
+  .action-buttons a:last-child,
+  .action-buttons button:last-child {
+    margin-bottom: 0 !important;
+  }
 }

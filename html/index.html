@@ -37,7 +37,7 @@
       </a>
       <a href="actividades.html" class="nav-link">Actividades</a>
       <a href="reportes.html" class="nav-link">Reportes</a>
-      <a href="usuarios.html" class="nav-link">Configuracion</a>
+      <a href="usuarios.html" class="nav-link">Configuración</a>
     </div>
 
     <!-- Botón Cerrar Sesión -->
@@ -52,11 +52,6 @@
 
   <main class="container">
     <section class="header-section">
-      <div>
-        <h1>Dashboard</h1>
-        <p style="color: var(--text-muted);">Métricas principales y gestión centralizada</p>
-      </div>
-
       <div class="action-buttons">
         <select id="periodo-dash" class="periodo-selector">
             <option value="2026-07-26|2026-08-25">Ago (26 Jul 2026 - 25 Ago 2026)</option>
@@ -155,6 +150,15 @@
       window.location.href = '../index.html';
     }
 
+    // Mapeo automático de clases CSS para badges de actividad
+    function obtenerClaseBadge(tipo) {
+      const t = (tipo || '').toUpperCase();
+      if (t.includes('INSTALAC')) return 'badge-instalacion';
+      if (t.includes('TRASLAD')) return 'badge-traslado';
+      if (t.includes('VISIT')) return 'badge-visita';
+      return 'badge-tag';
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // 1. Mostrar nombre de usuario en el badge
       const usuarioSesion = localStorage.getItem('usuarioSesion');
@@ -211,71 +215,64 @@
 
     function renderOrigen(origenList) {
       const contenedor = document.getElementById('panel-origen');
-      contenedor.innerHTML = '';
-
-      if (origenList.length === 0) {
+      
+      if (!origenList || origenList.length === 0) {
         contenedor.innerHTML = '<div class="stat-row"><span>Sin registros en el período</span></div>';
         return;
       }
 
-      origenList.forEach(item => {
-        contenedor.innerHTML += `
-          <div class="stat-row">
-            <div>
-              <strong style="color:var(--text-main);">${item.origen}</strong>
-              <div style="font-size:0.75rem; color:var(--text-muted);">${item.registros} trabajos</div>
-            </div>
-            <strong style="color:#10b981;">$${(parseFloat(item.monto) || 0).toFixed(2)}</strong>
+      contenedor.innerHTML = origenList.map(item => `
+        <div class="stat-row">
+          <div class="stat-info">
+            <strong>${item.origen}</strong>
+            <span class="stat-sub">${item.registros} trabajos</span>
           </div>
-        `;
-      });
+          <span class="stat-amount green">$${(parseFloat(item.monto) || 0).toFixed(2)}</span>
+        </div>
+      `).join('');
     }
 
     function renderTipos(tiposList) {
       const contenedor = document.getElementById('panel-tipos');
-      contenedor.innerHTML = '';
-
-      if (tiposList.length === 0) {
+      
+      if (!tiposList || tiposList.length === 0) {
         contenedor.innerHTML = '<div class="stat-row"><span>Sin registros en el período</span></div>';
         return;
       }
 
-      tiposList.forEach(item => {
-        contenedor.innerHTML += `
-          <div class="stat-row">
-            <div>
-              <strong style="color:var(--text-main);">${item.tipo_actividad}</strong>
-              <div style="font-size:0.75rem; color:var(--text-muted);">${item.cantidad} registros</div>
-            </div>
-            <strong style="color:#60a5fa;">$${(parseFloat(item.monto) || 0).toFixed(2)}</strong>
+      contenedor.innerHTML = tiposList.map(item => `
+        <div class="stat-row">
+          <div class="stat-info">
+            <span class="badge ${obtenerClaseBadge(item.tipo_actividad)}">${item.tipo_actividad}</span>
+            <span class="stat-sub">${item.cantidad} registros</span>
           </div>
-        `;
-      });
+          <span class="stat-amount blue">$${(parseFloat(item.monto) || 0).toFixed(2)}</span>
+        </div>
+      `).join('');
     }
 
-function renderRecientes(recientes) {
-  const tbody = document.getElementById('tabla-recientes');
-  tbody.innerHTML = '';
+    function renderRecientes(recientes) {
+      const tbody = document.getElementById('tabla-recientes');
+      
+      if (!recientes || recientes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin actividades recientes</td></tr>';
+        return;
+      }
 
-  if (recientes.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin actividades recientes</td></tr>';
-    return;
-  }
-
-  recientes.forEach(r => {
-    const fecha = r.fecha ? r.fecha.toString().substring(0, 10) : '-';
-    tbody.innerHTML += `
-      <tr>
-        <td data-label="Fecha">${fecha}</td>
-        <td data-label="Cuadrilla" style="font-weight:600;">${r.cuadrilla || 'PROPIA'}</td>
-        <td data-label="Cliente">${r.cliente || 'NO DEFINIDO'}</td>
-        <td data-label="Tipo"><span class="badge-tag">${r.tipo_actividad}</span></td>
-        <td data-label="Forma">${r.forma_actividad}</td>
-        <td data-label="Monto" style="font-weight:600; color:#10b981;">$${(parseFloat(r.total_act) || 0).toFixed(2)}</td>
-      </tr>
-    `;
-  });
-}
+      tbody.innerHTML = recientes.map(r => {
+        const fecha = r.fecha ? r.fecha.toString().substring(0, 10) : '-';
+        return `
+          <tr>
+            <td data-label="Fecha">${fecha}</td>
+            <td data-label="Cuadrilla" class="td-cuadrilla">${r.cuadrilla || 'PROPIA'}</td>
+            <td data-label="Cliente">${r.cliente || 'NO DEFINIDO'}</td>
+            <td data-label="Tipo"><span class="badge ${obtenerClaseBadge(r.tipo_actividad)}">${r.tipo_actividad}</span></td>
+            <td data-label="Forma">${r.forma_actividad}</td>
+            <td data-label="Monto" style="font-weight:700; color:#10b981;">$${(parseFloat(r.total_act) || 0).toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
   </script>
 </body>
 </html>
