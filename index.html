@@ -3,227 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Actividades FMAX</title>
+  <title>Iniciar Sesión - Actividades</title>
+
+  <!-- Verificación: Si ya inició sesión, redirige automáticamente al Dashboard -->
+  <script>
+    if (localStorage.getItem('usuarioSesion')) {
+      window.location.href = 'html/index.html';
+    }
+  </script>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/formularios.css">
+  <!-- Rutas relativas ajustadas para la raíz del proyecto -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/formularios.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: var(--bg-main, #0f172a);
+      margin: 0;
+    }
+    .login-card {
+      background: var(--bg-card, #1e293b);
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 380px;
+      color: #fff;
+    }
+    .login-card h2 { margin-bottom: 0.5rem; text-align: center; }
+    .login-card p { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .error-msg {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="nav-brand">
-    <span class="logo-text">Actividades</span>
-    <span class="user-pill" id="nombre-usuario">FMAX</span>
+  <div class="login-card">
+    <h2>Iniciar Sesión</h2>
+    <p>Ingresa tus credenciales para continuar</p>
+
+    <div id="error-box" class="error-msg"></div>
+
+    <form id="loginForm">
+      <div class="form-group" style="margin-bottom: 1.2rem;">
+        <label for="usuario">Usuario</label>
+        <input type="text" id="usuario" class="form-control" required placeholder="Ej. dcunez" style="width: 100%; padding: 0.75rem;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" class="form-control" required placeholder="••••••••" style="width: 100%; padding: 0.75rem;">
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 600;">
+        Ingresar
+      </button>
+    </form>
   </div>
 
-  <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="index.html" class="active">Inicio</a></li>
-      <li><a href="html/actividades.html">Actividades</a></li>
-      <li><a href="#">Reportes</a></li>
-      <li><a href="html/usuarios.html">Configuracion</a></li>
-    </ul>
-  </nav>
-
-  <main class="container">
-    <section class="header-section">
-      <div>
-        <h1>Dashboard</h1>
-        <p style="color: var(--text-muted);">Métricas principales y gestión centralizada</p>
-      </div>
-
-      <div class="action-buttons">
-        <select id="periodo-dash" class="periodo-selector">
-            <option value="2026-07-26|2026-08-25">Ago (26 Jul 2026 - 25 Ago 2026)</option>
-            <option value="2026-08-26|2026-09-25" selected>Sep (26 Ago 2026 - 25 Sep 2026)</option>
-            <option value="2026-09-26|2026-10-25">Oct (26 Sep 2026 - 25 Oct 2026)</option>
-            <option value="2026-10-26|2026-11-25">Nov (26 Oct 2026 - 25 Nov 2026)</option>
-            <option value="2026-11-26|2026-12-25">Dic (26 Nov 2026 - 25 Dic 2026)</option>
-        </select>
-        <a href="html/actividad-propia.html" class="btn-primary" style="text-decoration:none;">+ Actividad Propia</a>
-        <a href="html/actividad-externa.html" class="btn-secondary" style="text-decoration:none;">+ Actividad Externa</a>
-      </div>
-    </section>
-
-    <!-- Tarjetas KPI Principales -->
-    <div class="kpi-grid">
-      <div class="kpi-card green">
-        <span class="kpi-title">Monto Total Facturado</span>
-        <div class="kpi-value" id="dash-monto">$0.00</div>
-        <span class="kpi-sub">Total acumulado en el período</span>
-      </div>
-
-      <div class="kpi-card blue">
-        <span class="kpi-title">Total Actividades</span>
-        <div class="kpi-value" id="dash-actividades">0</div>
-        <span class="kpi-sub" id="dash-registros">0 registros guardados</span>
-      </div>
-
-      <div class="kpi-card orange">
-        <span class="kpi-title">Excedente Fibra</span>
-        <div class="kpi-value" id="dash-excedente-m">0 m</div>
-        <span class="kpi-sub" id="dash-excedente-val">Valor: $0.00</span>
-      </div>
-
-      <div class="kpi-card purple">
-        <span class="kpi-title">Puntos Red / AC</span>
-        <div class="kpi-value" id="dash-adicionales">0 / 0</div>
-        <span class="kpi-sub">Total Pt. Red / Equipos AC</span>
-      </div>
-    </div>
-
-    <!-- Desglose Analítico -->
-    <div class="panels-grid">
-      <div class="panel-card">
-        <h3>Resumen por Cuadrilla</h3>
-        <div id="panel-origen">
-          <div class="stat-row"><span>Cargando datos...</span></div>
-        </div>
-      </div>
-
-      <div class="panel-card">
-        <h3>Tipos de Actividades</h3>
-        <div id="panel-tipos">
-          <div class="stat-row"><span>Cargando datos...</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabla de Últimos Registros -->
-    <div class="panel-card" style="margin-bottom: 2rem;">
-      <h3>
-        Últimos Registros
-        <a href="html/actividades.html" style="font-size: 0.85rem; color: var(--accent, #3b82f6); text-decoration: none;">Ver todos →</a>
-      </h3>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Cuadrilla</th>
-              <th>Cliente</th>
-              <th>Tipo</th>
-              <th>Forma</th>
-              <th>Monto</th>
-            </tr>
-          </thead>
-          <tbody id="tabla-recientes">
-            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Cargando registros recientes...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </main>
-
-<footer style="text-align: center;">
-  <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
-</footer>
-
-  <!-- Script Principal y Lógica del Dashboard -->
-  <script src="script.js"></script>
   <script>
-    const API_DASHBOARD = 'https://actividades-fmax.vercel.app/api/dashboard';
-    const selectPeriodo = document.getElementById('periodo-dash');
+    const API_LOGIN = 'https://actividades-fmax.vercel.app/api/login';
 
-    document.addEventListener('DOMContentLoaded', () => {
-      cargarDashboard();
-      selectPeriodo.addEventListener('change', cargarDashboard);
-    });
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorBox = document.getElementById('error-box');
+      const btnSubmit = document.getElementById('btn-submit');
+      
+      errorBox.style.display = 'none';
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Verificando...';
 
-    async function cargarDashboard() {
-      const [fInicio, fFin] = selectPeriodo.value.split('|');
+      const usuarioVal = document.getElementById('usuario').value.trim();
+      const passwordVal = document.getElementById('password').value.trim();
 
       try {
-        const res = await fetch(`${API_DASHBOARD}?fecha_inicio=${fInicio}&fecha_fin=${fFin}`);
+        const res = await fetch(API_LOGIN, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario: usuarioVal, password: passwordVal })
+        });
+
         const data = await res.json();
 
-        if (res.ok) {
-          renderKPIs(data.summary || {});
-          renderOrigen(data.origen || []);
-          renderTipos(data.tipos || []);
-          renderRecientes(data.recientes || []);
+        if (!res.ok) {
+          throw new Error(data.error || 'Error al iniciar sesión');
         }
+
+        // Guardar datos del usuario autenticado
+        localStorage.setItem('usuarioSesion', JSON.stringify(data.user));
+
+        // Redirigir al dashboard dentro de la carpeta /html
+        window.location.href = 'html/index.html';
+
       } catch (err) {
-        console.error('Error al cargar datos del dashboard:', err);
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Ingresar';
       }
-    }
-
-    function renderKPIs(s) {
-      document.getElementById('dash-monto').textContent = `$${(parseFloat(s.total_monto) || 0).toFixed(2)}`;
-      document.getElementById('dash-actividades').textContent = s.total_actividades || 0;
-      document.getElementById('dash-registros').textContent = `${s.total_registros || 0} registros guardados`;
-      document.getElementById('dash-excedente-m').textContent = `${s.total_excedente_m || 0} m`;
-      document.getElementById('dash-excedente-val').textContent = `Valor: $${(parseFloat(s.total_excedente_val) || 0).toFixed(2)}`;
-      document.getElementById('dash-adicionales').textContent = `${s.total_puntos_red || 0} / ${s.total_ac || 0}`;
-    }
-
-    function renderOrigen(origenList) {
-      const contenedor = document.getElementById('panel-origen');
-      contenedor.innerHTML = '';
-
-      if (origenList.length === 0) {
-        contenedor.innerHTML = '<div class="stat-row"><span>Sin registros en el período</span></div>';
-        return;
-      }
-
-      origenList.forEach(item => {
-        contenedor.innerHTML += `
-          <div class="stat-row">
-            <div>
-              <strong style="color:var(--text-main,#fff);">${item.origen}</strong>
-              <div style="font-size:0.75rem; color:var(--text-muted,#94a3b8);">${item.registros} trabajos</div>
-            </div>
-            <strong style="color:#10b981;">$${(parseFloat(item.monto) || 0).toFixed(2)}</strong>
-          </div>
-        `;
-      });
-    }
-
-    function renderTipos(tiposList) {
-      const contenedor = document.getElementById('panel-tipos');
-      contenedor.innerHTML = '';
-
-      if (tiposList.length === 0) {
-        contenedor.innerHTML = '<div class="stat-row"><span>Sin registros en el período</span></div>';
-        return;
-      }
-
-      tiposList.forEach(item => {
-        contenedor.innerHTML += `
-          <div class="stat-row">
-            <div>
-              <strong style="color:var(--text-main,#fff);">${item.tipo_actividad}</strong>
-              <div style="font-size:0.75rem; color:var(--text-muted,#94a3b8);">${item.cantidad} registros</div>
-            </div>
-            <strong style="color:#60a5fa;">$${(parseFloat(item.monto) || 0).toFixed(2)}</strong>
-          </div>
-        `;
-      });
-    }
-
-    function renderRecientes(recientes) {
-      const tbody = document.getElementById('tabla-recientes');
-      tbody.innerHTML = '';
-
-      if (recientes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin actividades recientes</td></tr>';
-        return;
-      }
-
-      recientes.forEach(r => {
-        const fecha = r.fecha ? r.fecha.toString().substring(0, 10) : '-';
-        tbody.innerHTML += `
-          <tr>
-            <td>${fecha}</td>
-            <td style="font-weight:600;">${r.cuadrilla || 'PROPIA'}</td>
-            <td>${r.cliente || 'NO DEFINIDO'}</td>
-            <td><span class="badge-tag">${r.tipo_actividad}</span></td>
-            <td>${r.forma_actividad}</td>
-            <td style="font-weight:600; color:#10b981;">$${(parseFloat(r.total_act) || 0).toFixed(2)}</td>
-          </tr>
-        `;
-      });
-    }
+    });
   </script>
 </body>
 </html>
