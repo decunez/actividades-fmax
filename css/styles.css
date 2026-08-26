@@ -2,14 +2,15 @@
    1. VARIABLES GLOBALES Y TEMA
    ========================================== */
 :root {
-  --bg-primary: #ffffffd5;
+  --bg-primary: #f8fafc;
   --bg-surface: #ffffff;
-  --border: #575757;
+  --border: #e2e8f0;
+  --border-dark: #334155;
   --radius: 8px;
-  --text-main: #000000;
-  --text-muted: #030303;
-  --accent: #2b39f3;
-  --accent-hover: #4f46e5;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --accent: #1d4ed8;
+  --accent-hover: #1e40af;
   --success: #10b981;
 }
 
@@ -30,30 +31,81 @@ body {
   min-height: 100vh;
 }
 
-/* Estilos Base del Navbar */
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* ==========================================
+   3. NAVEGACIÓN Y NAVBAR
+   ========================================== */
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f8fafc;
-  padding: 0.8rem 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  font-family: 'Inter', sans-serif;
+  padding: 0.8rem 1.5rem;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-.nav-brand {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #0f172a;
+.nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-container h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.user-pill {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #4338ca;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #334155;
+  line-height: 1;
+}
+
+.nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-left: 2rem;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.5rem;
+  list-style: none;
 }
 
-/* Enlaces por defecto */
 .nav-link {
   display: inline-flex;
   align-items: center;
@@ -68,22 +120,16 @@ body {
 }
 
 .nav-link:hover {
-  color: #1e40af;
+  color: var(--accent);
   background-color: rgba(30, 64, 175, 0.05);
 }
 
-/* Enlace Activo (Botón Azul) */
 .nav-link.active {
-  background-color: #1d4ed8;
+  background-color: var(--accent);
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
 }
 
-.nav-link.active:hover {
-  background-color: #1e40af;
-}
-
-/* Botón Cerrar Sesión */
 .btn-logout {
   display: inline-flex;
   align-items: center;
@@ -104,105 +150,158 @@ body {
   color: #0f172a;
 }
 
-.user-pill {
-  background: rgba(99, 102, 241, 0.15);
-  color: #818cf8;
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  padding: 0.25rem 0.65rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* Lista de navegación */
-.nav-links {
-  display: flex;
-  gap: 0.35rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-links a {
-  color: #94a3b8;
-  text-decoration: none;
-  padding: 0.5rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s ease-in-out;
-}
-
-/* Hover suave */
-.nav-links a:hover {
-  color: #f8fafc;
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
-/* Link activo con destello */
-.nav-links a.active {
-  color: #ffffff;
-  background-color: #4f46e5;
-  font-weight: 600;
-  box-shadow: 0 0 12px rgba(79, 70, 229, 0.35);
-}
-
-.brand {
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--text-main);
-}
-
-.brand span {
-  color: var(--accent);
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-  list-style: none;
-}
-
-.nav-links a {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-  color: var(--text-main);
-}
-
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--text-main);
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
 /* ==========================================
-   4. ESTRUCTURA Y LAYOUT BASE
+   4. COMPONENTES DEL DASHBOARD
    ========================================== */
-.container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .header-section h1 {
   font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 0.25rem;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.periodo-selector {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Métricas KPI */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-left: 4px solid var(--accent);
+}
+
+.kpi-card.green { border-left-color: #10b981; }
+.kpi-card.blue { border-left-color: #3b82f6; }
+.kpi-card.orange { border-left-color: #f59e0b; }
+.kpi-card.purple { border-left-color: #8b5cf6; }
+
+.kpi-title {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.kpi-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Paneles y Tablas */
+.panels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.panel-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.panel-card h3 {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+  color: var(--text-main);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.table-container {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+th, td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th {
+  background-color: rgba(0, 0, 0, 0.02);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.badge-tag {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
 }
 
 /* ==========================================
-   5. BOTONES GLOBALES
+   5. BOTONES Y UTILIDADES
    ========================================== */
 .btn-primary,
 .btn-secondary {
@@ -226,167 +325,170 @@ body {
 
 .btn-secondary {
   background-color: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-dark);
   color: var(--text-main);
 }
 
 .btn-secondary:hover {
-  background-color: var(--border);
+  background-color: #f1f5f9;
 }
 
-/* ==========================================
-   6. UTILIDADES
-   ========================================== */
 .hidden {
   display: none !important;
 }
 
+/* ==========================================
+   6. RESPONSIVO OPTIMIZADO PARA MÓVILES
+   ========================================== */
+@media (max-width: 768px) {
+  /* Navbar fija en la parte superior con desenfoque */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem 1rem;
+  }
 
-    /* Estilos complementarios para el Dashboard */
-    .header-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
+  .nav-header {
+    width: 100%;
+  }
 
-    .action-buttons {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
+  .hamburger-btn {
+    display: block;
+    padding: 0.25rem 0.5rem;
+  }
 
-    .periodo-selector {
-      background: var(--bg-surface, #1e293b);
-      border: 1px solid var(--border, #334155);
-      color: var(--text-main, #f8fafc);
-      padding: 0.65rem 1rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      outline: none;
-      cursor: pointer;
-    }
+  .nav-content {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0.75rem;
+    gap: 0.75rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+  }
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-    }
+  .nav-content.show {
+    display: flex !important;
+  }
 
-    .kpi-card {
-      background-color: var(--bg-surface, #1e293b);
-      border: 1px solid var(--border, #334155);
-      border-radius: 12px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      position: relative;
-      border-left: 4px solid var(--accent, #3b82f6);
-    }
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.4rem;
+  }
 
-    .kpi-card.green { border-left-color: #10b981; }
-    .kpi-card.blue { border-left-color: #3b82f6; }
-    .kpi-card.orange { border-left-color: #f59e0b; }
-    .kpi-card.purple { border-left-color: #8b5cf6; }
+  /* Área táctil amplia (48px) para interacción cómoda en móviles */
+  .nav-link, 
+  .btn-logout,
+  .btn-primary,
+  .btn-secondary,
+  .periodo-selector {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.95rem;
+  }
 
-    .kpi-title {
-      font-size: 0.78rem;
-      color: var(--text-muted, #000000);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
 
-    .kpi-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-main, #ffffff);
-    }
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
 
-    .kpi-sub {
-      font-size: 0.8rem;
-      color: var(--text-muted, #b8a494);
-    }
+  /* Matriz 2x2 en KPIs para sintetizar información sin scroll excesivo */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
 
-    .panels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
+  .kpi-card {
+    padding: 0.85rem;
+    border-left-width: 3px;
+  }
 
-    .panel-card {
-      background: var(--bg-surface, #3b1e2a);
-      border: 1px solid var(--border, #334155);
-      border-radius: 12px;
-      padding: 1.25rem;
-    }
+  .kpi-title {
+    font-size: 0.7rem;
+  }
 
-    .panel-card h3 {
-      font-size: 1.05rem;
-      margin-bottom: 1rem;
-      color: var(--text-main, #ffffff);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+  .kpi-value {
+    font-size: 1.35rem;
+  }
 
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(204, 236, 23, 0.05);
-    }
+  .kpi-sub {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
 
-    .stat-row:last-child {
-      border-bottom: none;
-    }
+  /* Transformación de tabla estática a tarjetas móviles (Fichas) */
+  .table-container {
+    background: transparent;
+    border: none;
+  }
 
-    .table-container {
-      background-color: var(--bg-surface, #253b1e);
-      border: 1px solid var(--border, #334155);
-      border-radius: 12px;
-      overflow-x: auto;
-    }
+  .table-container table, 
+  .table-container thead, 
+  .table-container tbody, 
+  .table-container th, 
+  .table-container td, 
+  .table-container tr { 
+    display: block; 
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.88rem;
-    }
+  .table-container thead {
+    display: none;
+  }
 
-    th, td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border, #334155);
-      white-space: nowrap;
-    }
+  .table-container tr {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    padding: 0.85rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  }
 
-    th {
-      background-color: rgba(255, 255, 255, 0.02);
-      color: var(--text-muted, #94a3b8);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-    }
+  .table-container td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    white-space: normal;
+    font-size: 0.85rem;
+  }
 
-    .badge-tag {
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-    }
+  .table-container td:last-child {
+    border-bottom: none;
+  }
 
+  .table-container td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+}
 
-    /* ==========================================
-   ESTILOS EXCLUSIVOS PARA GENERACIÓN DE PDF
+/* ==========================================
+   7. GENERACIÓN DE PDF / IMPRESIÓN
    ========================================== */
 body.generating-pdf {
   background-color: #ffffff !important;
@@ -394,7 +496,6 @@ body.generating-pdf {
   font-family: Arial, sans-serif !important;
 }
 
-/* Ocultar botones, controles y filtros de búsqueda */
 body.generating-pdf .btn-pdf,
 body.generating-pdf .btn-primary,
 body.generating-pdf .btn-secondary,
@@ -407,7 +508,6 @@ body.generating-pdf .navbar {
   display: none !important;
 }
 
-/* Convertir tarjetas e indicadores a formato claro impreso */
 body.generating-pdf .kpi-card,
 body.generating-pdf .form-card,
 body.generating-pdf .card {
@@ -417,7 +517,6 @@ body.generating-pdf .card {
   box-shadow: none !important;
 }
 
-/* Formato de tabla limpio y de alto contraste */
 body.generating-pdf table {
   width: 100% !important;
   color: #0f172a !important;
@@ -433,133 +532,4 @@ body.generating-pdf th {
 body.generating-pdf td {
   border-bottom: 1px solid #e2e8f0 !important;
   color: #334155 !important;
-}
-
-/* ==========================================
-   NAVBAR RESPONSIVO Y MENÚ HAMBURGUESA
-   ========================================== */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background-color: var(--bg-surface, #151c2c);
-  border-bottom: 1px solid var(--border, #232d42);
-  position: relative;
-}
-
-.nav-brand {
-  display: flex;
-  flex-direction: column;
-}
-
-.nav-brand .logo {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #ffffff;
-}
-
-.nav-brand .user-name {
-  font-size: 0.85rem;
-  color: var(--accent, #6366f1);
-  font-weight: 600;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.nav-links a {
-  color: var(--text-muted, #9ca3af);
-  text-decoration: none;
-  font-size: 0.95rem;
-  transition: color 0.2s ease;
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-  color: #141111;
-}
-
-.menu-toggle {
-  display: none; /* Oculto en computadoras */
-  background: transparent;
-  border: none;
-  color: #181616;
-  font-size: 1.6rem;
-  cursor: pointer;
-  padding: 0.25rem;
-}
-
-/* Modo Móvil */
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block; /* Muestra el icono ☰ en celular */
-  }
-
-  .nav-links {
-    display: none; /* Se oculta por defecto */
-    flex-direction: column;
-    width: 100%;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: var(--bg-surface, #151c2c);
-    border-bottom: 1px solid var(--border, #232d42);
-    padding: 1rem;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  /* Clase que activa el desplegable al presionar ☰ */
-  .nav-links.active {
-    display: flex;
-  }
-}
-
-/* ==========================================
-   CORRECCIÓN DE BOTONES EN MÓVIL
-   ========================================== */
-@media (max-width: 768px) {
-  /* Envoltorio principal del título y botones */
-  .page-header, 
-  .header-container,
-  .main-header {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 1rem !important;
-  }
-
-  /* Contenedor de los 3 botones */
-  .header-actions,
-  .actions {
-    display: flex !important;
-    flex-direction: column !important;
-    width: 100% !important;
-    gap: 0.75rem !important;
-    margin-top: 0.5rem !important;
-  }
-
-  /* Reset y ajuste al 100% de cada botón */
-  .header-actions button,
-  .header-actions a,
-  .btn-pdf,
-  .btn-primary,
-  .btn-secondary {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: 44px !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-    margin: 0 !important;
-    white-space: nowrap !important;
-  }
 }
