@@ -1,7 +1,16 @@
 import { connect } from '@tidbcloud/serverless';
 
 export default async function handler(req, res) {
-  // Manejo directo de preflight OPTIONS
+  // Encabezados CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  // Respuesta inmediata para Preflight OPTIONS
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -15,6 +24,10 @@ export default async function handler(req, res) {
 
     if (!usuario || !password) {
       return res.status(400).json({ error: 'Ingrese usuario y contraseña' });
+    }
+
+    if (!process.env.DATABASE_URL) {
+      return res.status(500).json({ error: 'DATABASE_URL no definida en Vercel' });
     }
 
     const conn = connect({ url: process.env.DATABASE_URL });
@@ -43,7 +56,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Error en API Login:', error);
+    console.error('Error en Login API:', error);
     return res.status(500).json({ error: 'Error del servidor: ' + error.message });
   }
 }
