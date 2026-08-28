@@ -86,78 +86,48 @@
   </div>
 
 <script>
-  // Endpoints configurados correctamente
   const API_OBTENER_TODOS = 'https://actividades-fmax.vercel.app/api/obtener-usuarios';
   const API_CREAR = 'https://actividades-fmax.vercel.app/api/crear-usuario';
   const API_ACTUALIZAR = 'https://actividades-fmax.vercel.app/api/actualizar-usuario';
 
-  // Leer ID de la URL (?edit=ID)
   const urlParams = new URLSearchParams(window.location.search);
   const userId = urlParams.get('edit');
 
   document.addEventListener('DOMContentLoaded', () => {
+    // 1. Detectar si estamos editando
     if (userId) {
-      // Ajustar la vista a Modo Edición
       const titulo = document.querySelector('h1');
       if (titulo) titulo.textContent = 'Editar Usuario';
 
-      const btnSubmit = document.getElementById('btn-guardar') || document.querySelector('button[type="submit"]');
-      if (btnSubmit) btnSubmit.textContent = 'Guardar Cambios';
+      // Busca el botón por ID o por clase/tipo de botón
+      const btnGuardar = document.getElementById('btn-guardar') || 
+                         document.querySelector('.btn-primary') || 
+                         document.querySelector('button[type="submit"]');
+      if (btnGuardar) btnGuardar.textContent = 'Guardar Cambios';
 
       cargarDatosUsuario(userId);
     }
-  });
 
-  async function cargarDatosUsuario(id) {
-    try {
-      // Petición a la lista general para evitar el error 404
-      const res = await fetch(API_OBTENER_TODOS);
-      if (!res.ok) throw new Error('No se pudo conectar con el servidor.');
+    // 2. Capturar el formulario y el botón de envío DENTRO del DOMContentLoaded
+    const formUsuario = document.getElementById('form-usuario') || document.querySelector('form');
+    const btnGuardar = document.getElementById('btn-guardar') || 
+                       document.querySelector('.btn-primary') || 
+                       document.querySelector('button[type="submit"]');
 
-      const usuarios = await res.json();
-      const user = usuarios.find(u => String(u.id) === String(id));
-
-      if (!user) {
-        alert('El usuario no existe o fue eliminado');
-        return;
-      }
-
-      // Poblado seguro de inputs
-      if (document.getElementById('nombre')) document.getElementById('nombre').value = user.nombre || '';
-      if (document.getElementById('usuario')) document.getElementById('usuario').value = user.usuario || '';
-      if (document.getElementById('telefono')) document.getElementById('telefono').value = user.telefono || '';
-      if (document.getElementById('direccion')) document.getElementById('direccion').value = user.direccion || '';
-      if (document.getElementById('sector')) document.getElementById('sector').value = user.sector || '';
-
-      if (document.getElementById('valor_act')) document.getElementById('valor_act').value = user.valor_act ?? 7.00;
-      if (document.getElementById('valor_pred')) document.getElementById('valor_pred').value = user.valor_pred ?? 1.00;
-      if (document.getElementById('valor_ac')) document.getElementById('valor_ac').value = user.valor_ac ?? 1.00;
-      if (document.getElementById('valor_exc')) document.getElementById('valor_exc').value = user.valor_exc ?? 0.04;
-      if (document.getElementById('valor_visit')) document.getElementById('valor_visit').value = user.valor_visit ?? 6.00;
-
-    } catch (err) {
-      alert('Error al cargar datos: ' + err.message);
-    }
-  }
-
-  // Evento submit con selector alternativo
-  const formUsuario = document.getElementById('form-usuario') || document.querySelector('form');
-
-  if (formUsuario) {
-    formUsuario.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    async function guardarUsuario(e) {
+      if (e) e.preventDefault();
 
       const payload = {
-        nombre: document.getElementById('nombre')?.value,
-        usuario: document.getElementById('usuario')?.value,
-        telefono: document.getElementById('telefono')?.value,
-        direccion: document.getElementById('direccion')?.value,
-        sector: document.getElementById('sector')?.value,
-        valor_act: document.getElementById('valor_act')?.value,
-        valor_pred: document.getElementById('valor_pred')?.value,
-        valor_ac: document.getElementById('valor_ac')?.value,
-        valor_exc: document.getElementById('valor_exc')?.value,
-        valor_visit: document.getElementById('valor_visit')?.value
+        nombre: document.getElementById('nombre')?.value || '',
+        usuario: document.getElementById('usuario')?.value || '',
+        telefono: document.getElementById('telefono')?.value || '',
+        direccion: document.getElementById('direccion')?.value || '',
+        sector: document.getElementById('sector')?.value || '',
+        valor_act: document.getElementById('valor_act')?.value || 0,
+        valor_pred: document.getElementById('valor_pred')?.value || 0,
+        valor_ac: document.getElementById('valor_ac')?.value || 0,
+        valor_exc: document.getElementById('valor_exc')?.value || 0,
+        valor_visit: document.getElementById('valor_visit')?.value || 0
       };
 
       let url = API_CREAR;
@@ -174,14 +144,54 @@
         });
 
         const result = await res.json();
-        if (!res.ok) throw new Error(result.error || 'Ocurrió un error al procesar');
+        if (!res.ok) throw new Error(result.error || 'Ocurrió un error al guardar');
 
         alert(userId ? 'Usuario actualizado con éxito' : 'Usuario creado con éxito');
         window.location.href = 'usuarios.html';
       } catch (err) {
         alert('Error: ' + err.message);
       }
-    });
+    }
+
+    // Asignar evento al formulario
+    if (formUsuario) {
+      formUsuario.addEventListener('submit', guardarUsuario);
+    }
+
+    // Respaldo: si el botón no es de tipo submit o está fuera del form
+    if (btnGuardar && btnGuardar.type !== 'submit') {
+      btnGuardar.addEventListener('click', guardarUsuario);
+    }
+  });
+
+  async function cargarDatosUsuario(id) {
+    try {
+      const res = await fetch(API_OBTENER_TODOS);
+      if (!res.ok) throw new Error('No se pudo conectar con el servidor');
+
+      const usuarios = await res.json();
+      const user = usuarios.find(u => String(u.id) === String(id));
+
+      if (!user) {
+        alert('No se encontró el usuario');
+        return;
+      }
+
+      if (document.getElementById('nombre')) document.getElementById('nombre').value = user.nombre || '';
+      if (document.getElementById('usuario')) document.getElementById('usuario').value = user.usuario || '';
+      if (document.getElementById('telefono')) document.getElementById('telefono').value = user.telefono || '';
+      if (document.getElementById('direccion')) document.getElementById('direccion').value = user.direccion || '';
+      if (document.getElementById('sector')) document.getElementById('sector').value = user.sector || '';
+
+      if (document.getElementById('valor_act')) document.getElementById('valor_act').value = user.valor_act ?? 7.00;
+      if (document.getElementById('valor_pred')) document.getElementById('valor_pred').value = user.valor_pred ?? 1.00;
+      if (document.getElementById('valor_ac')) document.getElementById('valor_ac').value = user.valor_ac ?? 1.00;
+      if (document.getElementById('valor_exc')) document.getElementById('valor_exc').value = user.valor_exc ?? 0.04;
+      if (document.getElementById('valor_visit')) document.getElementById('valor_visit').value = user.valor_visit ?? 6.00;
+
+    } catch (err) {
+      alert('Error al cargar datos: ' + err.message);
+    }
   }
 </script>
 </body>
