@@ -1,8 +1,8 @@
 {
-  "name": "Fibramax App",
+  "name": "Actividades App",
   "short_name": "Fibramax",
   "description": "Sistema de gestión de actividades Fibramax",
-  "start_url": "/html/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0284c7",
