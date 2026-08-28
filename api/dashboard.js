@@ -20,61 +20,24 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-    const { 
-      fecha_inicio, 
-      fecha_fin, 
-      fecha, 
-      usuario_id, 
-      tipo_actividad, 
-      tipo_cuadrilla, 
-      cuadrilla_especifica, 
-      sector 
-    } = req.query;
+    const { fecha_inicio, fecha_fin, usuario_id } = req.query;
 
     let whereClause = 'WHERE 1=1';
     const params = [];
 
-    // 1. Filtro por Usuario (Se usa únicamente la columna 'usuario_id')
-    if (usuario_id) {
-      whereClause += ' AND usuario_id = ?';
+    // Ajustado a la columna real de la BD: id_usuario
+    if (usuario_id && usuario_id !== 'undefined' && usuario_id !== 'null' && usuario_id !== '') {
+      whereClause += ' AND id_usuario = ?';
       params.push(usuario_id);
     }
 
-    // 2. Filtro por Fecha / Rango
-    if (fecha) {
-      whereClause += ' AND DATE(fecha) = ?';
-      params.push(fecha);
-    } else if (fecha_inicio && fecha_fin) {
+    // Filtro por rango de fechas
+    if (fecha_inicio && fecha_fin) {
       whereClause += ' AND DATE(fecha) >= ? AND DATE(fecha) <= ?';
       params.push(fecha_inicio, fecha_fin);
     }
 
-    // 3. Filtro por Tipo de Actividad
-    if (tipo_actividad && tipo_actividad !== 'TODOS') {
-      whereClause += ' AND tipo_actividad = ?';
-      params.push(tipo_actividad);
-    }
-
-    // 4. Filtro por Cuadrilla
-    if (tipo_cuadrilla && tipo_cuadrilla !== 'TODOS') {
-      if (tipo_cuadrilla === 'PROPIA') {
-        whereClause += " AND UPPER(COALESCE(cuadrilla, 'PROPIA')) = 'PROPIA'";
-      } else if (tipo_cuadrilla === 'EXTERNA') {
-        whereClause += " AND UPPER(COALESCE(cuadrilla, 'PROPIA')) != 'PROPIA'";
-        if (cuadrilla_especifica && cuadrilla_especifica !== 'TODOS') {
-          whereClause += ' AND cuadrilla = ?';
-          params.push(cuadrilla_especifica);
-        }
-      }
-    }
-
-    // 5. Filtro por Sector
-    if (sector && sector !== 'TODOS') {
-      whereClause += ' AND sector = ?';
-      params.push(sector);
-    }
-
-    // Consulta KPIs
+    // 1. Resumen General (KPIs)
     const [kpis] = await connection.execute(`
       SELECT 
         COUNT(*) AS total_registros,
@@ -87,7 +50,7 @@ export default async function handler(req, res) {
       FROM act_detalles ${whereClause}
     `, params);
 
-    // Consulta Desglose Cuadrilla
+    // 2. Desglose Cuadrilla
     const [origenData] = await connection.execute(`
       SELECT 
         CASE WHEN UPPER(COALESCE(cuadrilla, 'PROPIA')) = 'PROPIA' THEN 'PROPIA' ELSE 'EXTERNA' END AS origen,
@@ -97,7 +60,7 @@ export default async function handler(req, res) {
       GROUP BY origen
     `, params);
 
-    // Consulta Desglose por Tipo
+    // 3. Desglose por Tipo de Actividad
     const [tipoData] = await connection.execute(`
       SELECT 
         tipo_actividad,
@@ -107,7 +70,7 @@ export default async function handler(req, res) {
       GROUP BY tipo_actividad
     `, params);
 
-    // Consulta Últimas Actividades
+    // 4. Últimas 5 Actividades
     const [recientes] = await connection.execute(`
       SELECT id, fecha, cuadrilla, cliente, tipo_actividad, forma_actividad, total_act
       FROM act_detalles ${whereClause}
@@ -123,7 +86,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error("Error en BD:", error);
+    console.error("Error BD Dashboard:", error);
     return res.status(500).json({ error: error.message });
   } finally {
     if (connection) {
