@@ -256,18 +256,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (inputPeriodo) {
     inputPeriodo.addEventListener('change', () => {
       evaluarEstadoFiltros();
-      inputFecha.value = '';
-      inputTipo.value = 'TODOS';
-      inputTipoCuadrilla.value = 'TODOS';
-      inputCuadrillaEspecifica.value = 'TODOS';
-      inputSector.value = 'TODOS';
+      if (inputFecha) inputFecha.value = '';
+      if (inputTipo) inputTipo.value = 'TODOS';
+      if (inputTipoCuadrilla) inputTipoCuadrilla.value = 'TODOS';
+      if (inputCuadrillaEspecifica) inputCuadrillaEspecifica.value = 'TODOS';
+      if (inputSector) inputSector.value = 'TODOS';
 
       if (inputPeriodo.value) {
         cargarActividades();
       } else {
         resetearKPIs();
         actividadesCargadas = [];
-        document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
+        const tbody = document.getElementById('tabla-body');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
       }
     });
   }
@@ -277,11 +278,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (inputTipoCuadrilla) {
     inputTipoCuadrilla.addEventListener('change', () => {
-      if (inputTipoCuadrilla.value === 'EXTERNA') {
-        inputCuadrillaEspecifica.disabled = false;
-      } else {
-        inputCuadrillaEspecifica.disabled = true;
-        inputCuadrillaEspecifica.value = 'TODOS';
+      if (inputCuadrillaEspecifica) {
+        if (inputTipoCuadrilla.value === 'EXTERNA') {
+          inputCuadrillaEspecifica.disabled = false;
+        } else {
+          inputCuadrillaEspecifica.disabled = true;
+          inputCuadrillaEspecifica.value = 'TODOS';
+        }
       }
       cargarActividades();
     });
@@ -293,13 +296,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnLimpiar = document.getElementById('btn-limpiar');
   if (btnLimpiar) {
     btnLimpiar.addEventListener('click', () => {
-      inputPeriodo.value = '2026-08-26|2026-09-25';
-      inputFecha.value = '';
-      inputTipo.value = 'TODOS';
-      inputTipoCuadrilla.value = 'TODOS';
-      inputCuadrillaEspecifica.value = 'TODOS';
-      inputCuadrillaEspecifica.disabled = true;
-      inputSector.value = 'TODOS';
+      if (inputPeriodo) inputPeriodo.value = '2026-08-26|2026-09-25';
+      if (inputFecha) inputFecha.value = '';
+      if (inputTipo) inputTipo.value = 'TODOS';
+      if (inputTipoCuadrilla) inputTipoCuadrilla.value = 'TODOS';
+      if (inputCuadrillaEspecifica) {
+        inputCuadrillaEspecifica.value = 'TODOS';
+        inputCuadrillaEspecifica.disabled = true;
+      }
+      if (inputSector) inputSector.value = 'TODOS';
       evaluarEstadoFiltros();
       cargarActividades();
     });
@@ -309,11 +314,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 function evaluarEstadoFiltros() {
   if (!inputPeriodo) return;
   const habilitar = Boolean(inputPeriodo.value);
-  inputFecha.disabled = !habilitar;
-  inputTipo.disabled = !habilitar;
-  inputTipoCuadrilla.disabled = !habilitar;
-  inputCuadrillaEspecifica.disabled = !habilitar || inputTipoCuadrilla.value !== 'EXTERNA';
-  inputSector.disabled = !habilitar;
+  if (inputFecha) inputFecha.disabled = !habilitar;
+  if (inputTipo) inputTipo.disabled = !habilitar;
+  if (inputTipoCuadrilla) inputTipoCuadrilla.disabled = !habilitar;
+  if (inputCuadrillaEspecifica) inputCuadrillaEspecifica.disabled = !habilitar || inputTipoCuadrilla.value !== 'EXTERNA';
+  if (inputSector) inputSector.disabled = !habilitar;
 }
 
 async function cargarSectores() {
@@ -382,7 +387,7 @@ async function cargarActividades() {
     }
   }
 
-  if (inputFecha.value) {
+  if (inputFecha && inputFecha.value) {
     params.append('fecha', inputFecha.value);
   } else {
     const [fInicio, fFin] = inputPeriodo.value.split('|');
@@ -390,18 +395,20 @@ async function cargarActividades() {
     params.append('fecha_fin', fFin);
   }
 
-  if (inputTipo.value !== 'TODOS') params.append('tipo_actividad', inputTipo.value);
+  if (inputTipo && inputTipo.value !== 'TODOS') params.append('tipo_actividad', inputTipo.value);
 
-  if (inputTipoCuadrilla.value !== 'TODOS') {
+  if (inputTipoCuadrilla && inputTipoCuadrilla.value !== 'TODOS') {
     params.append('tipo_cuadrilla', inputTipoCuadrilla.value);
-    if (inputTipoCuadrilla.value === 'EXTERNA' && inputCuadrillaEspecifica.value !== 'TODOS') {
+    if (inputTipoCuadrilla.value === 'EXTERNA' && inputCuadrillaEspecifica && inputCuadrillaEspecifica.value !== 'TODOS') {
       params.append('cuadrilla_especifica', inputCuadrillaEspecifica.value);
     }
   }
 
-  if (inputSector.value !== 'TODOS') params.append('sector', inputSector.value);
+  if (inputSector && inputSector.value !== 'TODOS') params.append('sector', inputSector.value);
 
   const tbody = document.getElementById('tabla-body');
+  if (!tbody) return;
+
   tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Cargando...</td></tr>';
 
   try {
@@ -438,7 +445,7 @@ async function cargarActividades() {
     let cantPtRed = 0, valPtRed = 0;
     let cantAC = 0, valAC = 0;
 
-    tbody.innerHTML = '';
+    let htmlRows = '';
 
     data.forEach(item => {
       const totalNum = parseFloat(item.total_act) || 0;
@@ -466,7 +473,7 @@ async function cargarActividades() {
       const esPropia = (item.cuadrilla || 'PROPIA') === 'PROPIA';
       const paginaDestino = esPropia ? 'actividad-propia.html' : 'actividad-externa.html';
 
-      tbody.innerHTML += `
+      htmlRows += `
         <tr>
           <td>${fechaFormateada}</td>
           <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
@@ -481,21 +488,29 @@ async function cargarActividades() {
             <button class="btn-edit" onclick="editarActividad(${JSON.stringify(item).replace(/"/g, '&quot;')}, '${paginaDestino}')">
               ✏️ Editar
             </button>
-            <button class="btn-eliminar" onclick="eliminarActividad(${r.id})">🗑️ Eliminar</button>
+            <button class="btn-eliminar" onclick="eliminarActividad(${item.id})">🗑️ Eliminar</button>
           </td>
         </tr>
       `;
     });
 
-    document.getElementById('kpi-registros').textContent = data.length;
-    document.getElementById('kpi-cant-act').textContent = totalCantAct;
-    document.getElementById('kpi-monto').textContent = `$${sumaMonto.toFixed(2)}`;
-    document.getElementById('kpi-excedente-cant').textContent = `${cantExcedente} m`;
-    document.getElementById('kpi-excedente-val').textContent = `$${valExcedente.toFixed(2)}`;
-    document.getElementById('kpi-ptred-cant').textContent = cantPtRed;
-    document.getElementById('kpi-ptred-val').textContent = `$${valPtRed.toFixed(2)}`;
-    document.getElementById('kpi-ac-cant').textContent = cantAC;
-    document.getElementById('kpi-ac-val').textContent = `$${valAC.toFixed(2)}`;
+    tbody.innerHTML = htmlRows;
+
+    // Actualizar KPIs fuera del bucle
+    const setTexto = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+
+    setTexto('kpi-registros', data.length);
+    setTexto('kpi-cant-act', totalCantAct);
+    setTexto('kpi-monto', `$${sumaMonto.toFixed(2)}`);
+    setTexto('kpi-excedente-cant', `${cantExcedente} m`);
+    setTexto('kpi-excedente-val', `$${valExcedente.toFixed(2)}`);
+    setTexto('kpi-ptred-cant', cantPtRed);
+    setTexto('kpi-ptred-val', `$${valPtRed.toFixed(2)}`);
+    setTexto('kpi-ac-cant', cantAC);
+    setTexto('kpi-ac-val', `$${valAC.toFixed(2)}`);
 
   } catch (err) {
     console.error(err);
@@ -504,7 +519,6 @@ async function cargarActividades() {
     actividadesCargadas = [];
   }
 }
-
 
 async function eliminarActividad(id) {
   if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) {
@@ -520,9 +534,9 @@ async function eliminarActividad(id) {
 
     if (res.ok) {
       alert('Registro eliminado con éxito.');
-      cargarDashboard(); // o la función que recarga tu tabla
+      cargarActividades();
     } else {
-      alert('Error: ' + data.error);
+      alert('Error: ' + (data.error || 'No se pudo eliminar la actividad'));
     }
   } catch (err) {
     console.error('Error al eliminar:', err);
@@ -530,17 +544,21 @@ async function eliminarActividad(id) {
   }
 }
 
-
 function resetearKPIs() {
-  document.getElementById('kpi-registros').textContent = '0';
-  document.getElementById('kpi-cant-act').textContent = '0';
-  document.getElementById('kpi-monto').textContent = '$0.00';
-  document.getElementById('kpi-excedente-cant').textContent = '0 m';
-  document.getElementById('kpi-excedente-val').textContent = '$0.00';
-  document.getElementById('kpi-ptred-cant').textContent = '0';
-  document.getElementById('kpi-ptred-val').textContent = '$0.00';
-  document.getElementById('kpi-ac-cant').textContent = '0';
-  document.getElementById('kpi-ac-val').textContent = '$0.00';
+  const setTexto = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+
+  setTexto('kpi-registros', '0');
+  setTexto('kpi-cant-act', '0');
+  setTexto('kpi-monto', '$0.00');
+  setTexto('kpi-excedente-cant', '0 m');
+  setTexto('kpi-excedente-val', '$0.00');
+  setTexto('kpi-ptred-cant', '0');
+  setTexto('kpi-ptred-val', '$0.00');
+  setTexto('kpi-ac-cant', '0');
+  setTexto('kpi-ac-val', '$0.00');
 }
 
 function editarActividad(actividad, paginaDestino) {
@@ -573,7 +591,7 @@ function generarReportePDF() {
   });
 
   const comboPeriodo = document.getElementById('periodo');
-  const periodoTexto = comboPeriodo.options[comboPeriodo.selectedIndex] ? comboPeriodo.options[comboPeriodo.selectedIndex].text : '-';
+  const periodoTexto = comboPeriodo && comboPeriodo.options[comboPeriodo.selectedIndex] ? comboPeriodo.options[comboPeriodo.selectedIndex].text : '-';
 
   doc.text(`Fecha de emisión: ${fechaHoy}`, 40, 45);
   doc.text(`Período: ${periodoTexto}`, 40, 56);
