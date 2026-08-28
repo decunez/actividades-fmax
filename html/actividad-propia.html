@@ -293,7 +293,7 @@ function actualizarFormaActividad() {
   if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
     selectForma.innerHTML = `
       <option value="NORMAL">NORMAL</option>
-      <option value="DUCTERIA">DUCTERIA/SOTERRADO</option>
+      <option value="DUCTERIA/SOTERRADO">DUCTERIA/SOTERRADO</option>
     `;
   } else if (tipo === 'VISITA') {
     selectForma.innerHTML = `
@@ -314,12 +314,12 @@ function calcularValores() {
   const fibra = parseInt(document.getElementById('cantidad_fibra').value) || 0;
 
   // 1. cantidad_act
-  const cantidad_act = forma === 'DUCTERIA' ? 2 : 1;
+  const cantidad_act = forma === 'DUCTERIA/SOTERRADO' ? 2 : 1;
 
   // 2. valor_actividad
   let valor_actividad = 0;
   if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
-    valor_actividad = forma === 'DUCTERIA' ? 14 : 7;
+    valor_actividad = forma === 'DUCTERIA/SOTERRADO' ? 14 : 7;
   } else if (tipo === 'VISITA') {
     if (forma === 'NORMAL') valor_actividad = 6;
     else if (forma === 'RECABLEADO-NORMAL') valor_actividad = 7;
@@ -394,7 +394,7 @@ async function guardarActividad(e) {
   }
 
   try {
-    const res = await fetch('https://actividades-fmax.vercel.app/api/activida-propia', {
+    const res = await fetch('https://actividades-fmax.vercel.app/api/actividad-propia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
