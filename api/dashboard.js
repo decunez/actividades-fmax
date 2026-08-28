@@ -34,13 +34,13 @@ export default async function handler(req, res) {
     let whereClause = 'WHERE 1=1';
     const params = [];
 
-    // Filtro por Usuario
+    // 1. Filtro por Usuario (Se usa únicamente la columna 'usuario_id')
     if (usuario_id) {
-      whereClause += ' AND (usuario_id = ? OR id_usuario = ?)';
-      params.push(usuario_id, usuario_id);
+      whereClause += ' AND usuario_id = ?';
+      params.push(usuario_id);
     }
 
-    // Filtro por Fecha / Rango
+    // 2. Filtro por Fecha / Rango
     if (fecha) {
       whereClause += ' AND DATE(fecha) = ?';
       params.push(fecha);
@@ -49,13 +49,13 @@ export default async function handler(req, res) {
       params.push(fecha_inicio, fecha_fin);
     }
 
-    // Filtro por Tipo de Actividad
+    // 3. Filtro por Tipo de Actividad
     if (tipo_actividad && tipo_actividad !== 'TODOS') {
       whereClause += ' AND tipo_actividad = ?';
       params.push(tipo_actividad);
     }
 
-    // Filtro por Cuadrilla
+    // 4. Filtro por Cuadrilla
     if (tipo_cuadrilla && tipo_cuadrilla !== 'TODOS') {
       if (tipo_cuadrilla === 'PROPIA') {
         whereClause += " AND UPPER(COALESCE(cuadrilla, 'PROPIA')) = 'PROPIA'";
@@ -68,13 +68,13 @@ export default async function handler(req, res) {
       }
     }
 
-    // Filtro por Sector
+    // 5. Filtro por Sector
     if (sector && sector !== 'TODOS') {
       whereClause += ' AND sector = ?';
       params.push(sector);
     }
 
-    // 1. Resumen General (KPIs)
+    // Consulta KPIs
     const [kpis] = await connection.execute(`
       SELECT 
         COUNT(*) AS total_registros,
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
       FROM act_detalles ${whereClause}
     `, params);
 
-    // 2. Desglose Cuadrilla
+    // Consulta Desglose Cuadrilla
     const [origenData] = await connection.execute(`
       SELECT 
         CASE WHEN UPPER(COALESCE(cuadrilla, 'PROPIA')) = 'PROPIA' THEN 'PROPIA' ELSE 'EXTERNA' END AS origen,
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
       GROUP BY origen
     `, params);
 
-    // 3. Desglose por Tipo de Actividad
+    // Consulta Desglose por Tipo
     const [tipoData] = await connection.execute(`
       SELECT 
         tipo_actividad,
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
       GROUP BY tipo_actividad
     `, params);
 
-    // 4. Últimas 5 Actividades
+    // Consulta Últimas Actividades
     const [recientes] = await connection.execute(`
       SELECT id, fecha, cuadrilla, cliente, tipo_actividad, forma_actividad, total_act
       FROM act_detalles ${whereClause}
@@ -116,10 +116,10 @@ export default async function handler(req, res) {
     `, params);
 
     return res.status(200).json({
-      summary: kpis[0],
-      origen: origenData,
-      tipos: tipoData,
-      recientes
+      summary: kpis[0] || {},
+      origen: origenData || [],
+      tipos: tipoData || [],
+      recientes: recientes || []
     });
 
   } catch (error) {
