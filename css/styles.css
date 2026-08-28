@@ -697,3 +697,30 @@ body.generating-pdf td {
     margin-bottom: 0 !important;
   }
 }
+
+.btn-action {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  margin-right: 0.3rem;
+  transition: background 0.2s;
+}
+
+.btn-edit {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+.btn-edit:hover {
+  background-color: #bae6fd;
+}
+
+.btn-delete {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+.btn-delete:hover {
+  background-color: #fecaca;
+}

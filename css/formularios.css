@@ -151,3 +151,34 @@
   width: 100%;
   padding: 2rem 0;         /* Espaciado opcional arriba y abajo */
 }
+
+  
+    .form-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 1.5rem 0 0.5rem 0;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.25rem;
+    }
+    .alert-box {
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .alert-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
