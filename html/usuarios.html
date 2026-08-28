@@ -14,30 +14,33 @@
   <link rel="stylesheet" href="../css/styles.css">
 
   <style>
-    /* Estilos para los botones de Acción */
-    .btn-action {
-      padding: 0.4rem 0.75rem;
-      font-size: 0.85rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      margin: 0 0.2rem;
-      transition: background 0.2s;
+    /* Estilos forzados para garantizar visibilidad de botones */
+    .btn-edit-usr {
+      background-color: #0284c7 !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 6px 12px !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+      font-weight: 600 !important;
+      margin-right: 6px !important;
+      display: inline-block !important;
     }
-    .btn-edit {
-      background-color: #e0f2fe;
-      color: #0369a1;
+    .btn-edit-usr:hover {
+      background-color: #0369a1 !important;
     }
-    .btn-edit:hover {
-      background-color: #bae6fd;
+    .btn-delete-usr {
+      background-color: #dc2626 !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 6px 12px !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+      font-weight: 600 !important;
+      display: inline-block !important;
     }
-    .btn-delete {
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-    .btn-delete:hover {
-      background-color: #fecaca;
+    .btn-delete-usr:hover {
+      background-color: #b91c1c !important;
     }
   </style>
 </head>
@@ -54,13 +57,13 @@
 
   <div id="nav-content" class="nav-content">
     <div class="nav-links">
-      <a href="index.html" class="nav-link active">
+      <a href="index.html" class="nav-link">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Inicio</span>
       </a>
       <a href="actividades.html" class="nav-link">Actividades</a>
       <a href="#" class="nav-link">Reportes</a>
-      <a href="usuarios.html" class="nav-link">Configuracion</a>
+      <a href="usuarios.html" class="nav-link active">Configuración</a>
     </div>
 
     <div class="nav-actions">
@@ -72,17 +75,15 @@
   </div>
 </nav>
 
-  <!-- Contenido Principal -->
   <main class="container">
     <section class="header-section">
       <div>
         <h1>Gestión de Usuarios</h1>
         <p style="color: var(--text-muted);">Directorio de usuarios registrados en el sistema</p>
       </div>
-      <button class="btn-primary" onclick="window.location.href='crear-usuario.html'">+ Nuevo Usuario</button>
+      <button class="btn-primary" onclick="window.location.href='crear_usuario.html'">+ Nuevo Usuario</button>
     </section>
 
-    <!-- Tabla dinámicamente poblada -->
     <div class="table-container">
       <table>
         <thead>
@@ -97,7 +98,7 @@
         </thead>
         <tbody id="tabla-usuarios">
           <tr>
-            <td colspan="6" class="loading-cell" style="text-align: center;">Cargando usuarios desde la base de datos...</td>
+            <td colspan="6" style="text-align: center;">Cargando usuarios...</td>
           </tr>
         </tbody>
       </table>
@@ -108,12 +109,10 @@
     <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
   </footer>
 
-  <!-- Script global (Navegación y Sesión) -->
   <script src="../script.js"></script>
 
-  <!-- Script exclusivo para cargar la tabla de Usuarios -->
   <script>
-    const API_OBTENER = 'https://actividades-fmax.vercel.app/api/obtener-usuarios';
+    const API_OBTENER = 'https://actividades-fmax.vercel.app/api/usuarios';
     const API_ELIMINAR = 'https://actividades-fmax.vercel.app/api/eliminar-usuario';
 
     document.addEventListener('DOMContentLoaded', cargarUsuarios);
@@ -129,30 +128,47 @@
     }
 
     function renderizarTabla(listaUsuarios) {
-      // ID corregido para que coincida con el tbody del HTML
       const tbody = document.getElementById('tabla-usuarios');
       if (!tbody) return;
       tbody.innerHTML = '';
+
+      if (!Array.isArray(listaUsuarios) || listaUsuarios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay usuarios registrados.</td></tr>';
+        return;
+      }
 
       listaUsuarios.forEach(user => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${user.id}</td>
-          <td><strong>${user.nombre}</strong></td>
+          <td><strong>${user.nombre || ''}</strong></td>
           <td>${user.telefono || '-'}</td>
           <td>${user.direccion || '-'}</td>
           <td><strong>${user.sector || '-'}</strong></td>
-          <td style="text-align: center;">
-            <button class="btn-action btn-edit" onclick="editarUsuario(${user.id})">Editar</button>
-            <button class="btn-action btn-delete" onclick="eliminarUsuario(${user.id}, '${user.nombre}')">Eliminar</button>
+          <td style="text-align: center; white-space: nowrap;">
+            <button class="btn-edit-usr" data-id="${user.id}">Editar</button>
+            <button class="btn-delete-usr" data-id="${user.id}" data-nombre="${user.nombre || ''}">Eliminar</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+
+      // Asignar eventos a los botones generados
+      tbody.querySelectorAll('.btn-edit-usr').forEach(btn => {
+        btn.addEventListener('click', () => {
+          window.location.href = `crear_usuario.html?edit=${btn.dataset.id}`;
+        });
+      });
+
+      tbody.querySelectorAll('.btn-delete-usr').forEach(btn => {
+        btn.addEventListener('click', () => {
+          eliminarUsuario(btn.dataset.id, btn.dataset.nombre);
+        });
+      });
     }
 
     async function eliminarUsuario(id, nombre) {
-      if (!confirm(`¿Estás seguro de que deseas eliminar a "${nombre}"?`)) return;
+      if (!confirm(`¿Estás seguro de eliminar a "${nombre}"?`)) return;
 
       try {
         const res = await fetch(API_ELIMINAR, {
@@ -170,10 +186,6 @@
       } catch (err) {
         alert('Error: ' + err.message);
       }
-    }
-
-    function editarUsuario(id) {
-      window.location.href = `crear-usuario.html?edit=${id}`;
     }
   </script>
 </body>

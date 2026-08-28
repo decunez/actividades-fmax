@@ -1,42 +1,75 @@
 module.exports = async function handler(req, res) {
+  // Configuración de cabeceras CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
+  // Respuesta rápida para preflight CORS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Validar método HTTP
+  if (req.method !== 'POST' && req.method !== 'PUT') {
+    return res.status(405).json({ error: 'Método no permitido' });
+  }
 
   try {
     const {
-      id, nombre, usuario, telefono, direccion, sector,
-      valor_act, valor_pred, valor_ac, valor_exc, valor_visit
+      id,
+      nombre,
+      usuario,
+      telefono,
+      direccion,
+      sector,
+      valor_act,
+      valor_pred,
+      valor_ac,
+      valor_exc,
+      valor_visit
     } = req.body || {};
 
-    if (!id || !nombre || !usuario) {
-      return res.status(400).json({ error: 'ID, nombre y usuario son obligatorios' });
+    // Validar campos obligatorios
+    if (!id) {
+      return res.status(400).json({ error: 'El ID es obligatorio para actualizar' });
+    }
+    if (!nombre || !usuario) {
+      return res.status(400).json({ error: 'El nombre y el usuario son obligatorios' });
     }
 
+    // Consulta SQL para actualización de datos
     const sqlQuery = `
       UPDATE actividades.usuarios 
-      SET nombre = ?, usuario = ?, telefono = ?, direccion = ?, sector = ?, 
-          valor_act = ?, valor_pred = ?, valor_ac = ?, valor_exc = ?, valor_visit = ?
+      SET 
+        nombre = ?, 
+        usuario = ?, 
+        telefono = ?, 
+        direccion = ?, 
+        sector = ?, 
+        valor_act = ?, 
+        valor_pred = ?, 
+        valor_ac = ?, 
+        valor_exc = ?, 
+        valor_visit = ?
       WHERE id = ?
     `;
 
     const params = [
-      nombre.toUpperCase(),
+      nombre.toUpperCase().trim(),
       usuario.toLowerCase().trim(),
-      telefono || null,
-      direccion || null,
-      sector || null,
-      parseFloat(valor_act) || 7.00,
-      parseFloat(valor_pred) || 1.00,
-      parseFloat(valor_ac) || 1.00,
-      parseFloat(valor_exc) || 0.04,
-      parseFloat(valor_visit) || 6.00,
+      telefono ? telefono.trim() : null,
+      direccion ? direccion.trim() : null,
+      sector ? sector.trim() : null,
+      valor_act !== undefined && valor_act !== '' ? parseFloat(valor_act) : 7.00,
+      valor_pred !== undefined && valor_pred !== '' ? parseFloat(valor_pred) : 1.00,
+      valor_ac !== undefined && valor_ac !== '' ? parseFloat(valor_ac) : 1.00,
+      valor_exc !== undefined && valor_exc !== '' ? parseFloat(valor_exc) : 0.04,
+      valor_visit !== undefined && valor_visit !== '' ? parseFloat(valor_visit) : 6.00,
       id
     ];
 
+    // Intentar ejecutar mediante TiDB Cloud Serverless y fallback a mysql2
     try {
       const { connect } = require('@tidbcloud/serverless');
       const conn = connect({ url: process.env.DATABASE_URL });
@@ -48,8 +81,15 @@ module.exports = async function handler(req, res) {
       await connection.end();
     }
 
-    return res.status(200).json({ success: true, message: 'Usuario actualizado correctamente' });
+    return res.status(200).json({
+      success: true,
+      message: 'Usuario actualizado correctamente'
+    });
+
   } catch (error) {
-    return res.status(500).json({ error: 'Error al actualizar: ' + error.message });
+    console.error('Error al actualizar usuario:', error);
+    return res.status(500).json({
+      error: 'Error en el servidor al actualizar: ' + error.message
+    });
   }
 };
