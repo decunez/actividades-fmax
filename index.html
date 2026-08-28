@@ -11,7 +11,8 @@
       window.location.href = 'html/index.html';
     }
   </script>
-
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#0284c7">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <!-- Rutas relativas ajustadas para la raíz del proyecto -->
   <link rel="stylesheet" href="css/styles.css">
@@ -88,5 +89,15 @@
       }
     });
   </script>
+
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker registrado con éxito'))
+        .catch(err => console.error('Error registrando Service Worker:', err));
+    });
+  }
+</script>
 </body>
 </html>

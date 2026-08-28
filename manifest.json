@@ -1,20 +1,19 @@
 {
-  "name": "Actividades FMAX",
-  "short_name": "FMAX",
-  "description": "Sistema de gestión de actividades FMAX",
-  "start_url": "/index.html",
+  "name": "Fibramax App",
+  "short_name": "Fibramax",
+  "description": "Sistema de gestión de actividades Fibramax",
+  "start_url": "/html/index.html",
   "display": "standalone",
-  "background_color": "#0b0f19",
-  "theme_color": "#151c2c",
-  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0284c7",
   "icons": [
     {
-      "src": "image/ico1.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/1043/1043444.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "image/ico1.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/1043/1043444.png",
       "sizes": "512x512",
       "type": "image/png"
     }
