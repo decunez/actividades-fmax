@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Usuario - Actividades</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/formularios.css">
+  <style>
+    .form-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: #ffffff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 1.5rem 0 0.5rem 0;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.25rem;
+    }
+    .alert-box {
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .alert-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Registrar Nuevo Usuario</h2>
+    <p style="color: #64748b; margin-bottom: 1rem;">Complete la información del usuario y configure sus tarifas</p>
+
+    <div id="msg-box" class="alert-box"></div>
+
+    <form id="userForm">
+      <!-- Datos Personales y Credenciales -->
+      <div class="section-title">Información Personal & Credenciales</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="nombre">Nombre Completo *</label>
+          <input type="text" id="nombre" class="form-control" required placeholder="Ej. Juan Pérez">
+        </div>
+        <div class="form-group">
+          <label for="usuario">Usuario *</label>
+          <input type="text" id="usuario" class="form-control" required placeholder="Ej. jperez">
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña *</label>
+          <input type="password" id="password" class="form-control" required placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <input type="text" id="telefono" class="form-control" placeholder="0987654321">
+        </div>
+        <div class="form-group">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" class="form-control" placeholder="Ej. Quito Norte">
+        </div>
+        <div class="form-group">
+          <label for="sector">Sector</label>
+          <select id="sector" class="form-control">
+            <option value="CENTRO">CENTRO</option>
+            <option value="NORTE">NORTE</option>
+            <option value="SUR">SUR</option>
+            <option value="VALLES">VALLES</option>
+            <option value="OTROS VALLES">OTROS VALLES</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Configuración de Tarifas -->
+      <div class="section-title">Tarifas Personalizadas ($)</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="valor_act">Valor Actividad</label>
+          <input type="number" step="0.01" id="valor_act" class="form-control" value="7.00">
+        </div>
+        <div class="form-group">
+          <label for="valor_visit">Valor Visita</label>
+          <input type="number" step="0.01" id="valor_visit" class="form-control" value="6.00">
+        </div>
+        <div class="form-group">
+          <label for="valor_pred">Valor Punto Red</label>
+          <input type="number" step="0.01" id="valor_pred" class="form-control" value="1.00">
+        </div>
+        <div class="form-group">
+          <label for="valor_ac">Valor AC</label>
+          <input type="number" step="0.01" id="valor_ac" class="form-control" value="1.00">
+        </div>
+        <div class="form-group">
+          <label for="valor_exc">Valor Excedente (metro)</label>
+          <input type="number" step="0.001" id="valor_exc" class="form-control" value="0.04">
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+        <button type="submit" id="btn-save" class="btn-primary" style="flex: 1; padding: 0.75rem;">Guardar Usuario</button>
+        <button type="button" onclick="history.back()" class="btn-secondary" style="padding: 0.75rem;">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // URL absoluta apuntando al backend en Vercel
+    const API_CREAR_USUARIO = 'https://actividades-fmax.vercel.app/api/crear-usuario';
+
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const msgBox = document.getElementById('msg-box');
+      const btnSave = document.getElementById('btn-save');
+
+      msgBox.style.display = 'none';
+      btnSave.disabled = true;
+      btnSave.textContent = 'Guardando...';
+
+      // Función auxiliar para convertir comas a puntos decimales
+      const parseDecimal = (id) => {
+        const val = document.getElementById(id).value.trim().replace(',', '.');
+        return val !== '' ? parseFloat(val) : 0;
+      };
+
+      const formData = {
+        nombre: document.getElementById('nombre').value.trim(),
+        usuario: document.getElementById('usuario').value.trim(),
+        password: document.getElementById('password').value.trim(),
+        telefono: document.getElementById('telefono').value.trim(),
+        direccion: document.getElementById('direccion').value.trim(),
+        sector: document.getElementById('sector').value,
+        valor_act: parseDecimal('valor_act'),
+        valor_visit: parseDecimal('valor_visit'),
+        valor_pred: parseDecimal('valor_pred'),
+        valor_ac: parseDecimal('valor_ac'),
+        valor_exc: parseDecimal('valor_exc')
+      };
+
+      try {
+        const response = await fetch(API_CREAR_USUARIO, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Error al guardar el usuario');
+
+        msgBox.className = 'alert-box alert-success';
+        msgBox.textContent = 'Usuario registrado con éxito.';
+        msgBox.style.display = 'block';
+
+        document.getElementById('userForm').reset();
+
+      } catch (err) {
+        msgBox.className = 'alert-box alert-danger';
+        msgBox.textContent = err.message;
+        msgBox.style.display = 'block';
+      } finally {
+        btnSave.disabled = false;
+        btnSave.textContent = 'Guardar Usuario';
+      }
+    });
+  </script>
+</body>
+</html>

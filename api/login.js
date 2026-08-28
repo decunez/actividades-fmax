@@ -30,22 +30,23 @@ module.exports = async function handler(req, res) {
 
     let rows = [];
 
+    // Consulta SQL incluyendo los valores de tarifas por usuario
+    const sqlQuery = `
+      SELECT id, nombre, usuario, sector, valor_act, valor_pred, valor_ac, valor_exc, valor_visit 
+      FROM actividades.usuarios 
+      WHERE usuario = ? AND password = ?
+    `;
+
     // Estrategia de conexión dual (TiDB / MySQL)
     try {
       const { connect } = require('@tidbcloud/serverless');
       const conn = connect({ url: process.env.DATABASE_URL });
-      const result = await conn.execute(
-        'SELECT id, nombre, usuario, sector FROM actividades.usuarios WHERE usuario = ? AND password = ?',
-        [usuario, password]
-      );
+      const result = await conn.execute(sqlQuery, [usuario, password]);
       rows = Array.isArray(result) ? result : (result.rows || []);
     } catch (e1) {
       const mysql = require('mysql2/promise');
       const connection = await mysql.createConnection(process.env.DATABASE_URL);
-      const [resRows] = await connection.execute(
-        'SELECT id, nombre, usuario, sector FROM actividades.usuarios WHERE usuario = ? AND password = ?',
-        [usuario, password]
-      );
+      const [resRows] = await connection.execute(sqlQuery, [usuario, password]);
       await connection.end();
       rows = resRows;
     }
@@ -63,7 +64,12 @@ module.exports = async function handler(req, res) {
         id: user.id,
         nombre: user.nombre,
         usuario: user.usuario,
-        sector: user.sector
+        sector: user.sector,
+        valor_act: user.valor_act,
+        valor_pred: user.valor_pred,
+        valor_ac: user.valor_ac,
+        valor_exc: user.valor_exc,
+        valor_visit: user.valor_visit
       }
     });
 

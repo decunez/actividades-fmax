@@ -572,30 +572,63 @@ function generarReportePDF() {
     return;
   }
 
+  // 1. Obtener nombre del usuario logueado desde localStorage
+  let nombreUsuario = 'Usuario';
+  const usuarioSesion = localStorage.getItem('usuarioSesion');
+  if (usuarioSesion) {
+    try {
+      const u = JSON.parse(usuarioSesion);
+      nombreUsuario = u.nombre || u.nombre_completo || u.usuario || 'Usuario';
+    } catch (e) {
+      console.error("Error al leer usuario para el PDF:", e);
+    }
+  }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 
+  // --- ENCABEZADO Y DISEÑO ---
+  // Banda decorativa superior
+  doc.setFillColor(15, 23, 42); // Slate-900
+  doc.rect(0, 0, 842, 6, 'F');
+
+  // Título principal
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(15);
+  doc.setFontSize(16);
   doc.setTextColor(15, 23, 42);
   doc.text('REPORTE DE ACTIVIDADES', 40, 32);
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  doc.setTextColor(100, 116, 139);
-
+  // Fecha de emisión alineada a la derecha
   const fechaHoy = new Date().toLocaleDateString('es-ES', { 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric' 
   });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Fecha de emisión: ${fechaHoy}`, 802, 32, { align: 'right' });
 
+  // Metadatos (Usuario y Período)
   const comboPeriodo = document.getElementById('periodo');
-  const periodoTexto = comboPeriodo && comboPeriodo.options[comboPeriodo.selectedIndex] ? comboPeriodo.options[comboPeriodo.selectedIndex].text : '-';
+  const periodoTexto = comboPeriodo && comboPeriodo.options[comboPeriodo.selectedIndex] 
+    ? comboPeriodo.options[comboPeriodo.selectedIndex].text 
+    : '-';
 
-  doc.text(`Fecha de emisión: ${fechaHoy}`, 40, 45);
-  doc.text(`Período: ${periodoTexto}`, 40, 56);
+  doc.setFontSize(9);
+  doc.setTextColor(51, 65, 85);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Generado por:', 40, 48);
+  doc.setFont('helvetica', 'normal');
+  doc.text(nombreUsuario, 110, 48);
 
+  doc.setFont('helvetica', 'bold');
+  doc.text('Período:', 320, 48);
+  doc.setFont('helvetica', 'normal');
+  doc.text(periodoTexto, 365, 48);
+
+  // --- CÁLCULO DE TOTALES ---
   let totalCantAct = 0;
   let totalExcedente = 0;
   let totalPtRed = 0;
@@ -609,18 +642,20 @@ function generarReportePDF() {
     totalAC += parseInt(item.ac) || 0;
   });
 
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(30, 41, 59);
-  doc.text(
-    `Total Actividades: ${totalCantAct}   |   Excedente: ${totalExcedente} m   |   Puntos de Red: ${totalPtRed}   |   Equipos AC: ${totalAC}`, 
-    40, 
-    70
-  );
-
-  doc.setDrawColor(226, 232, 240);
+  // Tarjeta contenedora de KPIs (Resumen rápido)
+  doc.setFillColor(248, 250, 252); // Slate-50
+  doc.setDrawColor(226, 232, 240); // Slate-200
   doc.setLineWidth(1);
-  doc.line(40, 76, 802, 76);
+  doc.roundedRect(40, 60, 762, 25, 4, 4, 'FD');
 
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+
+  const kpiTexto = `Actividades: ${totalCantAct}   |   Excedente: ${totalExcedente} m   |   Puntos de Red: ${totalPtRed}   |   Equipos AC: ${totalAC}`;
+  doc.text(kpiTexto, 52, 76);
+
+  // --- TABLA DE DATOS ---
   const head = [['#', 'Cant.', 'Fecha', 'Cuadrilla', 'Cliente', 'Tipo', 'Forma', 'Fibra', 'Excedente', 'Pt. Red', 'AC']];
 
   const body = actividadesCargadas.map((item, index) => {
@@ -647,7 +682,7 @@ function generarReportePDF() {
   doc.autoTable({
     head: head,
     body: body,
-    startY: 85,
+    startY: 96,
     margin: { left: 40, right: 40, bottom: 45 },
     theme: 'grid',
     showHead: 'firstPage',
@@ -693,7 +728,6 @@ function generarReportePDF() {
 
   doc.save(`Reporte_Actividades_${new Date().toISOString().split('T')[0]}.pdf`);
 }
-
 function cerrarSesion() {
   localStorage.removeItem('usuarioSesion');
   window.location.href = '../index.html';

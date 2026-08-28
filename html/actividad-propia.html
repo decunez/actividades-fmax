@@ -308,7 +308,41 @@ function actualizarFormaActividad() {
   }
 }
 
+function obtenerTarifasUsuario() {
+  const usuarioSesion = localStorage.getItem('usuarioSesion');
+  
+  // Valores por defecto en caso de que la BD tenga valores NULL o no exista la sesión
+  const tarifas = {
+    valor_act: 7.00,
+    valor_pred: 1.00,
+    valor_ac: 1.00,
+    valor_exc: 0.04,
+    valor_visit: 6.00
+  };
+
+  if (usuarioSesion) {
+    try {
+      const user = JSON.parse(usuarioSesion);
+      
+      // Si la BD devuelve un valor válido, lo usa; de lo contrario toma el valor por defecto
+      if (user.valor_act !== null && user.valor_act !== undefined) tarifas.valor_act = parseFloat(user.valor_act);
+      if (user.valor_pred !== null && user.valor_pred !== undefined) tarifas.valor_pred = parseFloat(user.valor_pred);
+      if (user.valor_ac !== null && user.valor_ac !== undefined) tarifas.valor_ac = parseFloat(user.valor_ac);
+      if (user.valor_exc !== null && user.valor_exc !== undefined) tarifas.valor_exc = parseFloat(user.valor_exc);
+      if (user.valor_visit !== null && user.valor_visit !== undefined) tarifas.valor_visit = parseFloat(user.valor_visit);
+
+    } catch (e) {
+      console.error('Error al parsear tarifas del usuario:', e);
+    }
+  }
+
+  return tarifas;
+}
+
 function calcularValores() {
+  // Obtener tarifas dinámicas del usuario activo
+  const tarifas = obtenerTarifasUsuario();
+
   const tipo = document.getElementById('tipo_actividad').value;
   const forma = document.getElementById('forma_actividad').value;
   const fibra = parseInt(document.getElementById('cantidad_fibra').value) || 0;
@@ -316,32 +350,31 @@ function calcularValores() {
   // 1. cantidad_act
   const cantidad_act = forma === 'DUCTERIA/SOTERRADO' ? 2 : 1;
 
-  // 2. valor_actividad
+  // 2. valor_actividad (Usa valor_act y valor_visit de la BD)
   let valor_actividad = 0;
   if (tipo === 'INSTALACION' || tipo === 'TRASLADO') {
-    valor_actividad = forma === 'DUCTERIA/SOTERRADO' ? 14 : 7;
+    valor_actividad = forma === 'DUCTERIA/SOTERRADO' ? (tarifas.valor_act * 2) : tarifas.valor_act;
   } else if (tipo === 'VISITA') {
-    if (forma === 'NORMAL') valor_actividad = 6;
-    else if (forma === 'RECABLEADO-NORMAL') valor_actividad = 7;
-    else if (forma === 'RECABLEADO-DUCTERIA') valor_actividad = 14;
-    else if (forma === 'RECABLEADO-SOTERRADO') valor_actividad = 14;
+    if (forma === 'NORMAL') valor_actividad = tarifas.valor_visit;
+    else if (forma === 'RECABLEADO-NORMAL') valor_actividad = tarifas.valor_act;
+    else if (forma === 'RECABLEADO-DUCTERIA' || forma === 'RECABLEADO-SOTERRADO') valor_actividad = tarifas.valor_act * 2;
   }
 
-  // 3. punto_red y valor_pred
+  // 3. punto_red y valor_pred (Usa valor_pred de la BD)
   const puntoRedChecked = document.querySelector('input[name="tiene_punto_red"]:checked');
   const tienePunto = puntoRedChecked ? puntoRedChecked.value === 'SI' : false;
   const punto_red = tienePunto ? (parseInt(document.getElementById('punto_red_cant').value) || 0) : 0;
-  const valor_pred = punto_red * 1;
+  const valor_pred = punto_red * tarifas.valor_pred;
 
-  // 4. ac y valor_ac
+  // 4. ac y valor_ac (Usa valor_ac de la BD)
   const acChecked = document.querySelector('input[name="tiene_ac"]:checked');
   const tieneAc = acChecked ? acChecked.value === 'SI' : false;
   const ac = tieneAc ? (parseInt(document.getElementById('ac_cant').value) || 0) : 0;
-  const valor_ac = ac * 1;
+  const valor_ac = ac * tarifas.valor_ac;
 
-  // 5. exedente y valor_exedente
+  // 5. exedente y valor_exedente (Usa valor_exc de la BD)
   const exedente = fibra > 350 ? fibra - 350 : 0;
-  const valor_exedente = exedente * 0.04;
+  const valor_exedente = exedente * tarifas.valor_exc;
 
   // 6. Total actividad
   const total_act = valor_actividad + valor_pred + valor_ac + valor_exedente;
