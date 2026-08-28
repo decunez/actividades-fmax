@@ -8,8 +8,10 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Método no permitido' });
 
+  let connection;
+
   try {
-    const connection = await mysql.createConnection({
+    connection = await mysql.createConnection({
       host: process.env.TIDB_HOST,
       port: Number(process.env.TIDB_PORT) || 4000,
       user: process.env.TIDB_USER,
@@ -18,14 +20,58 @@ export default async function handler(req, res) {
       ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
     });
 
-    const { fecha_inicio, fecha_fin } = req.query;
+    const { 
+      fecha_inicio, 
+      fecha_fin, 
+      fecha, 
+      usuario_id, 
+      tipo_actividad, 
+      tipo_cuadrilla, 
+      cuadrilla_especifica, 
+      sector 
+    } = req.query;
 
     let whereClause = 'WHERE 1=1';
     const params = [];
 
-    if (fecha_inicio && fecha_fin) {
+    // Filtro por Usuario
+    if (usuario_id) {
+      whereClause += ' AND (usuario_id = ? OR id_usuario = ?)';
+      params.push(usuario_id, usuario_id);
+    }
+
+    // Filtro por Fecha / Rango
+    if (fecha) {
+      whereClause += ' AND DATE(fecha) = ?';
+      params.push(fecha);
+    } else if (fecha_inicio && fecha_fin) {
       whereClause += ' AND DATE(fecha) >= ? AND DATE(fecha) <= ?';
       params.push(fecha_inicio, fecha_fin);
+    }
+
+    // Filtro por Tipo de Actividad
+    if (tipo_actividad && tipo_actividad !== 'TODOS') {
+      whereClause += ' AND tipo_actividad = ?';
+      params.push(tipo_actividad);
+    }
+
+    // Filtro por Cuadrilla
+    if (tipo_cuadrilla && tipo_cuadrilla !== 'TODOS') {
+      if (tipo_cuadrilla === 'PROPIA') {
+        whereClause += " AND UPPER(COALESCE(cuadrilla, 'PROPIA')) = 'PROPIA'";
+      } else if (tipo_cuadrilla === 'EXTERNA') {
+        whereClause += " AND UPPER(COALESCE(cuadrilla, 'PROPIA')) != 'PROPIA'";
+        if (cuadrilla_especifica && cuadrilla_especifica !== 'TODOS') {
+          whereClause += ' AND cuadrilla = ?';
+          params.push(cuadrilla_especifica);
+        }
+      }
+    }
+
+    // Filtro por Sector
+    if (sector && sector !== 'TODOS') {
+      whereClause += ' AND sector = ?';
+      params.push(sector);
     }
 
     // 1. Resumen General (KPIs)
@@ -41,17 +87,17 @@ export default async function handler(req, res) {
       FROM act_detalles ${whereClause}
     `, params);
 
-    // 2. Desglose Cuadrilla (Suma exacta de cantidad_act -> 14)
+    // 2. Desglose Cuadrilla
     const [origenData] = await connection.execute(`
       SELECT 
-        CASE WHEN UPPER(cuadrilla) = 'PROPIA' THEN 'PROPIA' ELSE 'EXTERNA' END AS origen,
+        CASE WHEN UPPER(COALESCE(cuadrilla, 'PROPIA')) = 'PROPIA' THEN 'PROPIA' ELSE 'EXTERNA' END AS origen,
         COALESCE(SUM(CAST(cantidad_act AS UNSIGNED)), 0) AS registros,
         COALESCE(SUM(total_act), 0) AS monto
       FROM act_detalles ${whereClause}
       GROUP BY origen
     `, params);
 
-    // 3. Desglose por Tipo de Actividad (Suma exacta de cantidad_act -> 14)
+    // 3. Desglose por Tipo de Actividad
     const [tipoData] = await connection.execute(`
       SELECT 
         tipo_actividad,
@@ -69,8 +115,6 @@ export default async function handler(req, res) {
       LIMIT 5
     `, params);
 
-    await connection.end();
-
     return res.status(200).json({
       summary: kpis[0],
       origen: origenData,
@@ -79,6 +123,11 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
+    console.error("Error en BD:", error);
     return res.status(500).json({ error: error.message });
+  } finally {
+    if (connection) {
+      await connection.end();
+    }
   }
 }

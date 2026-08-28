@@ -190,259 +190,337 @@
 
   <script src="../script.js"></script>
   <script>
-    const API_BASE = 'https://actividades-fmax.vercel.app/api/actividades';
+const API_BASE = 'https://actividades-fmax.vercel.app/api/actividades';
 
-    const inputPeriodo = document.getElementById('periodo');
-    const inputFecha = document.getElementById('fecha');
-    const inputTipo = document.getElementById('tipo_actividad');
-    const inputTipoCuadrilla = document.getElementById('tipo_cuadrilla');
-    const inputCuadrillaEspecifica = document.getElementById('cuadrilla_especifica');
-    const inputSector = document.getElementById('sector');
+const inputPeriodo = document.getElementById('periodo');
+const inputFecha = document.getElementById('fecha');
+const inputTipo = document.getElementById('tipo_actividad');
+const inputTipoCuadrilla = document.getElementById('tipo_cuadrilla');
+const inputCuadrillaEspecifica = document.getElementById('cuadrilla_especifica');
+const inputSector = document.getElementById('sector');
 
-    // Variable global para almacenar los registros cargados y usarlos en el PDF
-    let actividadesCargadas = [];
+// Variable global para almacenar los registros cargados y usarlos en el PDF
+let actividadesCargadas = [];
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Toggle Menú Móvil
-      const menuToggle = document.getElementById('menuToggle');
-      const navLinks = document.getElementById('navLinks');
-      if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. OBTENER Y MOSTRAR USUARIO EN SESIÓN (USER BADGE)
+  const badge = document.getElementById('user-badge');
+  const usuarioSesion = localStorage.getItem('usuarioSesion');
+  let user = null;
+
+  if (usuarioSesion) {
+    try {
+      user = JSON.parse(usuarioSesion);
+      if (badge) {
+        badge.textContent = user.nombre || user.nombre_completo || user.usuario || 'Usuario';
       }
+    } catch (e) {
+      console.error("Error al parsear usuarioSesion:", e);
+    }
+  }
 
-      await Promise.all([cargarSectores(), cargarCuadrillasExternas()]);
-      evaluarEstadoFiltros();
-      cargarActividades();
+  // 2. TOGGLE MENÚ MÓVIL Y NAVEGACIÓN
+  const btnMenu = document.getElementById('btn-menu') || document.getElementById('menuToggle');
+  const navContent = document.getElementById('nav-content') || document.getElementById('navLinks');
 
-      // Eventos de filtros
-      inputPeriodo.addEventListener('change', () => {
-        evaluarEstadoFiltros();
-        inputFecha.value = '';
-        inputTipo.value = 'TODOS';
-        inputTipoCuadrilla.value = 'TODOS';
-        inputCuadrillaEspecifica.value = 'TODOS';
-        inputSector.value = 'TODOS';
-
-        if (inputPeriodo.value) {
-          cargarActividades();
-        } else {
-          resetearKPIs();
-          actividadesCargadas = [];
-          document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
-        }
-      });
-
-      inputFecha.addEventListener('change', cargarActividades);
-      inputTipo.addEventListener('change', cargarActividades);
-
-      inputTipoCuadrilla.addEventListener('change', () => {
-        if (inputTipoCuadrilla.value === 'EXTERNA') {
-          inputCuadrillaEspecifica.disabled = false;
-        } else {
-          inputCuadrillaEspecifica.disabled = true;
-          inputCuadrillaEspecifica.value = 'TODOS';
-        }
-        cargarActividades();
-      });
-
-      inputCuadrillaEspecifica.addEventListener('change', cargarActividades);
-      inputSector.addEventListener('change', cargarActividades);
-
-      document.getElementById('btn-limpiar').addEventListener('click', () => {
-        inputPeriodo.value = '2026-08-26|2026-09-25';
-        inputFecha.value = '';
-        inputTipo.value = 'TODOS';
-        inputTipoCuadrilla.value = 'TODOS';
-        inputCuadrillaEspecifica.value = 'TODOS';
-        inputCuadrillaEspecifica.disabled = true;
-        inputSector.value = 'TODOS';
-        evaluarEstadoFiltros();
-        cargarActividades();
-      });
+  if (btnMenu && navContent) {
+    btnMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navContent.classList.toggle('show');
+      navContent.classList.toggle('active');
     });
 
-    function evaluarEstadoFiltros() {
-      const habilitar = Boolean(inputPeriodo.value);
-      inputFecha.disabled = !habilitar;
-      inputTipo.disabled = !habilitar;
-      inputTipoCuadrilla.disabled = !habilitar;
-      inputCuadrillaEspecifica.disabled = !habilitar || inputTipoCuadrilla.value !== 'EXTERNA';
-      inputSector.disabled = !habilitar;
-    }
-
-    async function cargarSectores() {
-      try {
-        const res = await fetch(`${API_BASE}?obtener_sectores=true`);
-        const sectores = await res.json();
-        inputSector.innerHTML = '<option value="TODOS">TODOS LOS SECTORES</option>';
-
-        if (Array.isArray(sectores)) {
-          sectores.forEach(sec => {
-            const nombreSec = typeof sec === 'object' ? (sec.sector || '') : sec;
-            if (nombreSec) {
-              const option = document.createElement('option');
-              option.value = nombreSec;
-              option.textContent = nombreSec;
-              inputSector.appendChild(option);
-            }
-          });
-        }
-      } catch (e) {
-        console.error("Error cargando sectores:", e);
+    document.addEventListener('click', (e) => {
+      if (!navContent.contains(e.target) && !btnMenu.contains(e.target)) {
+        navContent.classList.remove('show', 'active');
       }
+    });
+  }
+
+  // Remarcar enlace activo según la página
+  const paginaActual = window.location.pathname.split('/').pop() || 'index.html';
+  document.querySelectorAll('.nav-link').forEach(link => {
+    if (link.getAttribute('href') === paginaActual) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
     }
+  });
 
-    async function cargarCuadrillasExternas() {
-      try {
-        const res = await fetch(`${API_BASE}?obtener_cuadrillas=true`);
-        const cuadrillas = await res.json();
-        inputCuadrillaEspecifica.innerHTML = '<option value="TODOS">TODAS LAS EXTERNAS</option>';
+  // 3. CARGA INICIAL DE DATOS
+  await Promise.all([cargarSectores(), cargarCuadrillasExternas()]);
+  evaluarEstadoFiltros();
+  cargarActividades();
 
-        if (Array.isArray(cuadrillas)) {
-          cuadrillas.forEach(c => {
-            if (c) {
-              const option = document.createElement('option');
-              option.value = c;
-              option.textContent = c;
-              inputCuadrillaEspecifica.appendChild(option);
-            }
-          });
-        }
-      } catch (e) {
-        console.error("Error cargando cuadrillas externas:", e);
-      }
-    }
+  // 4. EVENTOS DE FILTROS
+  if (inputPeriodo) {
+    inputPeriodo.addEventListener('change', () => {
+      evaluarEstadoFiltros();
+      inputFecha.value = '';
+      inputTipo.value = 'TODOS';
+      inputTipoCuadrilla.value = 'TODOS';
+      inputCuadrillaEspecifica.value = 'TODOS';
+      inputSector.value = 'TODOS';
 
-    async function cargarActividades() {
-      if (!inputPeriodo.value) return;
-
-      const params = new URLSearchParams();
-
-      if (inputFecha.value) {
-        params.append('fecha', inputFecha.value);
+      if (inputPeriodo.value) {
+        cargarActividades();
       } else {
-        const [fInicio, fFin] = inputPeriodo.value.split('|');
-        params.append('fecha_inicio', fInicio);
-        params.append('fecha_fin', fFin);
-      }
-
-      if (inputTipo.value !== 'TODOS') params.append('tipo_actividad', inputTipo.value);
-
-      if (inputTipoCuadrilla.value !== 'TODOS') {
-        params.append('tipo_cuadrilla', inputTipoCuadrilla.value);
-        if (inputTipoCuadrilla.value === 'EXTERNA' && inputCuadrillaEspecifica.value !== 'TODOS') {
-          params.append('cuadrilla_especifica', inputCuadrillaEspecifica.value);
-        }
-      }
-
-      if (inputSector.value !== 'TODOS') params.append('sector', inputSector.value);
-
-      const tbody = document.getElementById('tabla-body');
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Cargando...</td></tr>';
-
-      try {
-        const res = await fetch(`${API_BASE}?${params.toString()}`);
-        const data = await res.json();
-
-        if (!Array.isArray(data) || data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
-          resetearKPIs();
-          actividadesCargadas = [];
-          return;
-        }
-
-        actividadesCargadas = data; // Guarda en memoria para exportar a PDF
-
-        let sumaMonto = 0;
-        let totalCantAct = 0;
-        let cantExcedente = 0, valExcedente = 0;
-        let cantPtRed = 0, valPtRed = 0;
-        let cantAC = 0, valAC = 0;
-
-        tbody.innerHTML = '';
-
-        data.forEach(item => {
-          const totalNum = parseFloat(item.total_act) || 0;
-          sumaMonto += totalNum;
-
-          const cantParsed = parseInt(item.cantidad_act, 10);
-          totalCantAct += (!isNaN(cantParsed) && cantParsed > 0) ? cantParsed : 1;
-
-          cantExcedente += parseInt(item.exedente) || 0;
-          valExcedente += parseFloat(item.valor_exedente) || 0;
-
-          cantPtRed += parseInt(item.punto_red) || 0;
-          valPtRed += parseFloat(item.valor_pred) || 0;
-
-          cantAC += parseInt(item.ac) || 0;
-          valAC += parseFloat(item.valor_ac) || 0;
-
-          const fechaFormateada = item.fecha ? item.fecha.toString().substring(0, 10) : '-';
-          
-          let badgeClass = 'badge';
-          if (item.tipo_actividad === 'INSTALACION') badgeClass += ' badge-instalacion';
-          else if (item.tipo_actividad === 'TRASLADO') badgeClass += ' badge-traslado';
-          else if (item.tipo_actividad === 'VISITA') badgeClass += ' badge-visita';
-
-          const esPropia = (item.cuadrilla || 'PROPIA') === 'PROPIA';
-          const paginaDestino = esPropia ? 'actividad-propia.html' : 'actividad-externa.html';
-
-          tbody.innerHTML += `
-            <tr>
-              <td>${fechaFormateada}</td>
-              <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
-              <td>${item.cliente || 'NO DEFINIDO'}</td>
-              <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
-              <td>${item.forma_actividad}</td>
-              <td>${item.cantidad_fibra || 0} m</td>
-              <td>${item.punto_red || 0}</td>
-              <td>${item.ac || 0}</td>
-              <td style="font-weight: 600; color: #10b981;">$${totalNum.toFixed(2)}</td>
-              <td>
-                <button class="btn-edit" onclick="editarActividad(${JSON.stringify(item).replace(/"/g, '&quot;')}, '${paginaDestino}')">
-                  ✏️ Editar
-                </button>
-              </td>
-            </tr>
-          `;
-        });
-
-        document.getElementById('kpi-registros').textContent = data.length;
-        document.getElementById('kpi-cant-act').textContent = totalCantAct;
-        document.getElementById('kpi-monto').textContent = `$${sumaMonto.toFixed(2)}`;
-        document.getElementById('kpi-excedente-cant').textContent = `${cantExcedente} m`;
-        document.getElementById('kpi-excedente-val').textContent = `$${valExcedente.toFixed(2)}`;
-        document.getElementById('kpi-ptred-cant').textContent = cantPtRed;
-        document.getElementById('kpi-ptred-val').textContent = `$${valPtRed.toFixed(2)}`;
-        document.getElementById('kpi-ac-cant').textContent = cantAC;
-        document.getElementById('kpi-ac-val').textContent = `$${valAC.toFixed(2)}`;
-
-      } catch (err) {
-        console.error(err);
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
         resetearKPIs();
         actividadesCargadas = [];
+        document.getElementById('tabla-body').innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Seleccione un período de facturación</td></tr>';
+      }
+    });
+  }
+
+  if (inputFecha) inputFecha.addEventListener('change', cargarActividades);
+  if (inputTipo) inputTipo.addEventListener('change', cargarActividades);
+
+  if (inputTipoCuadrilla) {
+    inputTipoCuadrilla.addEventListener('change', () => {
+      if (inputTipoCuadrilla.value === 'EXTERNA') {
+        inputCuadrillaEspecifica.disabled = false;
+      } else {
+        inputCuadrillaEspecifica.disabled = true;
+        inputCuadrillaEspecifica.value = 'TODOS';
+      }
+      cargarActividades();
+    });
+  }
+
+  if (inputCuadrillaEspecifica) inputCuadrillaEspecifica.addEventListener('change', cargarActividades);
+  if (inputSector) inputSector.addEventListener('change', cargarActividades);
+
+  const btnLimpiar = document.getElementById('btn-limpiar');
+  if (btnLimpiar) {
+    btnLimpiar.addEventListener('click', () => {
+      inputPeriodo.value = '2026-08-26|2026-09-25';
+      inputFecha.value = '';
+      inputTipo.value = 'TODOS';
+      inputTipoCuadrilla.value = 'TODOS';
+      inputCuadrillaEspecifica.value = 'TODOS';
+      inputCuadrillaEspecifica.disabled = true;
+      inputSector.value = 'TODOS';
+      evaluarEstadoFiltros();
+      cargarActividades();
+    });
+  }
+});
+
+function evaluarEstadoFiltros() {
+  if (!inputPeriodo) return;
+  const habilitar = Boolean(inputPeriodo.value);
+  inputFecha.disabled = !habilitar;
+  inputTipo.disabled = !habilitar;
+  inputTipoCuadrilla.disabled = !habilitar;
+  inputCuadrillaEspecifica.disabled = !habilitar || inputTipoCuadrilla.value !== 'EXTERNA';
+  inputSector.disabled = !habilitar;
+}
+
+async function cargarSectores() {
+  try {
+    const res = await fetch(`${API_BASE}?obtener_sectores=true`);
+    const sectores = await res.json();
+    if (inputSector) {
+      inputSector.innerHTML = '<option value="TODOS">TODOS LOS SECTORES</option>';
+      if (Array.isArray(sectores)) {
+        sectores.forEach(sec => {
+          const nombreSec = typeof sec === 'object' ? (sec.sector || '') : sec;
+          if (nombreSec) {
+            const option = document.createElement('option');
+            option.value = nombreSec;
+            option.textContent = nombreSec;
+            inputSector.appendChild(option);
+          }
+        });
       }
     }
+  } catch (e) {
+    console.error("Error cargando sectores:", e);
+  }
+}
 
-    function resetearKPIs() {
-      document.getElementById('kpi-registros').textContent = '0';
-      document.getElementById('kpi-cant-act').textContent = '0';
-      document.getElementById('kpi-monto').textContent = '$0.00';
-      document.getElementById('kpi-excedente-cant').textContent = '0 m';
-      document.getElementById('kpi-excedente-val').textContent = '$0.00';
-      document.getElementById('kpi-ptred-cant').textContent = '0';
-      document.getElementById('kpi-ptred-val').textContent = '$0.00';
-      document.getElementById('kpi-ac-cant').textContent = '0';
-      document.getElementById('kpi-ac-val').textContent = '$0.00';
+async function cargarCuadrillasExternas() {
+  try {
+    const res = await fetch(`${API_BASE}?obtener_cuadrillas=true`);
+    const cuadrillas = await res.json();
+    if (inputCuadrillaEspecifica) {
+      inputCuadrillaEspecifica.innerHTML = '<option value="TODOS">TODAS LAS EXTERNAS</option>';
+      if (Array.isArray(cuadrillas)) {
+        cuadrillas.forEach(c => {
+          if (c) {
+            const option = document.createElement('option');
+            option.value = c;
+            option.textContent = c;
+            inputCuadrillaEspecifica.appendChild(option);
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.error("Error cargando cuadrillas externas:", e);
+  }
+}
+
+async function cargarActividades() {
+  if (!inputPeriodo || !inputPeriodo.value) return;
+
+  const params = new URLSearchParams();
+
+  // --- LÓGICA DE USUARIO EN SESIÓN ---
+  const usuarioSesion = localStorage.getItem('usuarioSesion');
+  let idUsuarioLogeado = null;
+
+  if (usuarioSesion) {
+    try {
+      const user = JSON.parse(usuarioSesion);
+      idUsuarioLogeado = user.id || user.usuario_id || user.id_usuario;
+      if (idUsuarioLogeado) {
+        params.append('usuario_id', idUsuarioLogeado);
+      }
+    } catch (e) {
+      console.error("Error leyendo datos del usuario:", e);
+    }
+  }
+
+  if (inputFecha.value) {
+    params.append('fecha', inputFecha.value);
+  } else {
+    const [fInicio, fFin] = inputPeriodo.value.split('|');
+    params.append('fecha_inicio', fInicio);
+    params.append('fecha_fin', fFin);
+  }
+
+  if (inputTipo.value !== 'TODOS') params.append('tipo_actividad', inputTipo.value);
+
+  if (inputTipoCuadrilla.value !== 'TODOS') {
+    params.append('tipo_cuadrilla', inputTipoCuadrilla.value);
+    if (inputTipoCuadrilla.value === 'EXTERNA' && inputCuadrillaEspecifica.value !== 'TODOS') {
+      params.append('cuadrilla_especifica', inputCuadrillaEspecifica.value);
+    }
+  }
+
+  if (inputSector.value !== 'TODOS') params.append('sector', inputSector.value);
+
+  const tbody = document.getElementById('tabla-body');
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Cargando...</td></tr>';
+
+  try {
+    const res = await fetch(`${API_BASE}?${params.toString()}`);
+    let data = await res.json();
+
+    if (!Array.isArray(data)) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No se encontraron actividades</td></tr>';
+      resetearKPIs();
+      actividadesCargadas = [];
+      return;
     }
 
-    function editarActividad(actividad, paginaDestino) {
-      localStorage.setItem('actividadEditando', JSON.stringify(actividad));
-      window.location.href = paginaDestino;
+    // Filtro adicional en cliente para garantizar que solo vea sus registros
+    if (idUsuarioLogeado) {
+      data = data.filter(item => {
+        const itemUserId = item.usuario_id || item.id_usuario || item.user_id;
+        return !itemUserId || itemUserId == idUsuarioLogeado;
+      });
     }
 
-// Generador de PDF Ajustado con Resumen e Indicadores KPI
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No se encontraron actividades para este usuario</td></tr>';
+      resetearKPIs();
+      actividadesCargadas = [];
+      return;
+    }
+
+    actividadesCargadas = data; // Guardar en memoria para exportar a PDF
+
+    let sumaMonto = 0;
+    let totalCantAct = 0;
+    let cantExcedente = 0, valExcedente = 0;
+    let cantPtRed = 0, valPtRed = 0;
+    let cantAC = 0, valAC = 0;
+
+    tbody.innerHTML = '';
+
+    data.forEach(item => {
+      const totalNum = parseFloat(item.total_act) || 0;
+      sumaMonto += totalNum;
+
+      const cantParsed = parseInt(item.cantidad_act, 10);
+      totalCantAct += (!isNaN(cantParsed) && cantParsed > 0) ? cantParsed : 1;
+
+      cantExcedente += parseInt(item.exedente) || 0;
+      valExcedente += parseFloat(item.valor_exedente) || 0;
+
+      cantPtRed += parseInt(item.punto_red) || 0;
+      valPtRed += parseFloat(item.valor_pred) || 0;
+
+      cantAC += parseInt(item.ac) || 0;
+      valAC += parseFloat(item.valor_ac) || 0;
+
+      const fechaFormateada = item.fecha ? item.fecha.toString().substring(0, 10) : '-';
+      
+      let badgeClass = 'badge';
+      if (item.tipo_actividad === 'INSTALACION') badgeClass += ' badge-instalacion';
+      else if (item.tipo_actividad === 'TRASLADO') badgeClass += ' badge-traslado';
+      else if (item.tipo_actividad === 'VISITA') badgeClass += ' badge-visita';
+
+      const esPropia = (item.cuadrilla || 'PROPIA') === 'PROPIA';
+      const paginaDestino = esPropia ? 'actividad-propia.html' : 'actividad-externa.html';
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${fechaFormateada}</td>
+          <td style="font-weight: 600;">${item.cuadrilla || 'PROPIA'}</td>
+          <td>${item.cliente || 'NO DEFINIDO'}</td>
+          <td><span class="${badgeClass}">${item.tipo_actividad}</span></td>
+          <td>${item.forma_actividad}</td>
+          <td>${item.cantidad_fibra || 0} m</td>
+          <td>${item.punto_red || 0}</td>
+          <td>${item.ac || 0}</td>
+          <td style="font-weight: 600; color: #10b981;">$${totalNum.toFixed(2)}</td>
+          <td>
+            <button class="btn-edit" onclick="editarActividad(${JSON.stringify(item).replace(/"/g, '&quot;')}, '${paginaDestino}')">
+              ✏️ Editar
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    document.getElementById('kpi-registros').textContent = data.length;
+    document.getElementById('kpi-cant-act').textContent = totalCantAct;
+    document.getElementById('kpi-monto').textContent = `$${sumaMonto.toFixed(2)}`;
+    document.getElementById('kpi-excedente-cant').textContent = `${cantExcedente} m`;
+    document.getElementById('kpi-excedente-val').textContent = `$${valExcedente.toFixed(2)}`;
+    document.getElementById('kpi-ptred-cant').textContent = cantPtRed;
+    document.getElementById('kpi-ptred-val').textContent = `$${valPtRed.toFixed(2)}`;
+    document.getElementById('kpi-ac-cant').textContent = cantAC;
+    document.getElementById('kpi-ac-val').textContent = `$${valAC.toFixed(2)}`;
+
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #ef4444;">Error al cargar datos</td></tr>';
+    resetearKPIs();
+    actividadesCargadas = [];
+  }
+}
+
+function resetearKPIs() {
+  document.getElementById('kpi-registros').textContent = '0';
+  document.getElementById('kpi-cant-act').textContent = '0';
+  document.getElementById('kpi-monto').textContent = '$0.00';
+  document.getElementById('kpi-excedente-cant').textContent = '0 m';
+  document.getElementById('kpi-excedente-val').textContent = '$0.00';
+  document.getElementById('kpi-ptred-cant').textContent = '0';
+  document.getElementById('kpi-ptred-val').textContent = '$0.00';
+  document.getElementById('kpi-ac-cant').textContent = '0';
+  document.getElementById('kpi-ac-val').textContent = '$0.00';
+}
+
+function editarActividad(actividad, paginaDestino) {
+  localStorage.setItem('actividadEditando', JSON.stringify(actividad));
+  window.location.href = paginaDestino;
+}
+
 function generarReportePDF() {
   if (!actividadesCargadas || actividadesCargadas.length === 0) {
     alert("No hay datos para generar el reporte.");
@@ -452,7 +530,6 @@ function generarReportePDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 
-  // 1. Título principal
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
   doc.setTextColor(15, 23, 42);
@@ -474,7 +551,6 @@ function generarReportePDF() {
   doc.text(`Fecha de emisión: ${fechaHoy}`, 40, 45);
   doc.text(`Período: ${periodoTexto}`, 40, 56);
 
-  // 2. Cálculo de métricas para el encabezado
   let totalCantAct = 0;
   let totalExcedente = 0;
   let totalPtRed = 0;
@@ -488,7 +564,6 @@ function generarReportePDF() {
     totalAC += parseInt(item.ac) || 0;
   });
 
-  // Resumen KPI en el encabezado
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 41, 59);
   doc.text(
@@ -497,15 +572,12 @@ function generarReportePDF() {
     70
   );
 
-  // Línea divisoria
   doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(1);
   doc.line(40, 76, 802, 76);
 
-  // 3. Estructura de cabeceras de la tabla (Columna 'Cant.' junto a '#')
   const head = [['#', 'Cant.', 'Fecha', 'Cuadrilla', 'Cliente', 'Tipo', 'Forma', 'Fibra', 'Excedente', 'Pt. Red', 'AC']];
 
-  // Map de filas
   const body = actividadesCargadas.map((item, index) => {
     const fechaFormateada = item.fecha ? item.fecha.toString().substring(0, 10) : '-';
     const cantAct = parseInt(item.cantidad_act, 10) || 1;
@@ -527,14 +599,13 @@ function generarReportePDF() {
     ];
   });
 
-  // 4. Renderizado con AutoTable
   doc.autoTable({
     head: head,
     body: body,
     startY: 85,
     margin: { left: 40, right: 40, bottom: 45 },
     theme: 'grid',
-    showHead: 'firstPage', // Mantiene el encabezado solo en la primera página
+    showHead: 'firstPage',
     headStyles: {
       fillColor: [21, 28, 44],
       textColor: [255, 255, 255],
@@ -547,17 +618,17 @@ function generarReportePDF() {
       textColor: [51, 65, 85]
     },
     columnStyles: {
-      0: { halign: 'center', cellWidth: 25, fontStyle: 'bold' }, // # Conteo
-      1: { halign: 'center', cellWidth: 35, fontStyle: 'bold' }, // Cantidad Actividad
-      2: { halign: 'center', cellWidth: 60 },                   // Fecha
-      3: { halign: 'center', cellWidth: 65 },                   // Cuadrilla
-      4: { halign: 'left', cellWidth: 200 },                                     // Cliente
-      5: { halign: 'center', cellWidth: 70 },                   // Tipo
-      6: { halign: 'center', cellWidth: 120 },                   // Forma
-      7: { halign: 'right', cellWidth: 45 },                    // Fibra
-      8: { halign: 'right', cellWidth: 50 },                    // Excedente
-      9: { halign: 'center', cellWidth: 40 },                   // Pt. Red
-      10: { halign: 'center', cellWidth: 30 }                   // AC
+      0: { halign: 'center', cellWidth: 25, fontStyle: 'bold' },
+      1: { halign: 'center', cellWidth: 35, fontStyle: 'bold' },
+      2: { halign: 'center', cellWidth: 60 },
+      3: { halign: 'center', cellWidth: 65 },
+      4: { halign: 'left', cellWidth: 200 },
+      5: { halign: 'center', cellWidth: 70 },
+      6: { halign: 'center', cellWidth: 120 },
+      7: { halign: 'right', cellWidth: 45 },
+      8: { halign: 'right', cellWidth: 50 },
+      9: { halign: 'center', cellWidth: 40 },
+      10: { halign: 'center', cellWidth: 30 }
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252]
@@ -570,7 +641,6 @@ function generarReportePDF() {
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(148, 163, 184);
 
-      // Pie de página del PDF
       doc.text('© 2026 Daniel Cuñez - Todos los derechos reservados', 40, pageHeight - 20);
       doc.text(`Página ${data.pageNumber}`, pageWidth - 75, pageHeight - 20);
     }
@@ -579,90 +649,10 @@ function generarReportePDF() {
   doc.save(`Reporte_Actividades_${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
-
-document.addEventListener('DOMContentLoaded', () => {
-  const usuarioSesion = localStorage.getItem('usuarioSesion');
-
-  if (usuarioSesion) {
-    const user = JSON.parse(usuarioSesion);
-    
-    // Busca el campo del nombre en la respuesta del backend
-    const nombreUsuario = user.nombre || user.nombre_completo || user.usuario || 'Usuario';
-    
-    // Asigna el texto a la etiqueta
-    const badge = document.getElementById('user-badge');
-    if (badge) {
-      badge.textContent = nombreUsuario;
-    }
-  }
-});
-
-/* ==========================================
-   LÓGICA GLOBAL DE NAVEGACIÓN Y SESIÓN
-   ========================================== */
-
-// Función global de cierre de sesión
 function cerrarSesion() {
   localStorage.removeItem('usuarioSesion');
-  // Redirige al login o página principal
   window.location.href = '../index.html';
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. MENÚ HAMBURGUESA RESPONSIVO
-  const btnMenu = document.getElementById('btn-menu');
-  const navContent = document.getElementById('nav-content');
-
-  if (btnMenu && navContent) {
-    // Abrir / Cerrar menú al presionar el botón
-    btnMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-      navContent.classList.toggle('show');
-    });
-
-    // Cerrar el menú si se hace clic fuera de él
-    document.addEventListener('click', (e) => {
-      if (!navContent.contains(e.target) && !btnMenu.contains(e.target)) {
-        navContent.classList.remove('show');
-      }
-    });
-
-    // Cerrar el menú al presionar un enlace de navegación
-    const links = navContent.querySelectorAll('.nav-link');
-    links.forEach(link => {
-      link.addEventListener('click', () => {
-        navContent.classList.remove('show');
-      });
-    });
-  }
-
-  // 2. ACTUALIZAR INSIGNIA DE USUARIO (USER BADGE)
-  const badge = document.getElementById('user-badge');
-  if (badge) {
-    const usuarioSesion = localStorage.getItem('usuarioSesion');
-    if (usuarioSesion) {
-      try {
-        const user = JSON.parse(usuarioSesion);
-        badge.textContent = user.nombre || user.nombre_completo || user.usuario || 'Usuario';
-      } catch (err) {
-        badge.textContent = 'Usuario';
-      }
-    }
-  }
-
-  // 3. REMARCAR AUTOMÁTICAMENTE EL ENLACE ACTIVO SEGÚN LA PÁGINA
-  const paginaActual = window.location.pathname.split('/').pop() || 'index.html';
-  const navLinks = document.querySelectorAll('.nav-link');
-
-  navLinks.forEach(link => {
-    const href = link.getAttribute('href');
-    if (href === paginaActual) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
-  });
-});
   </script>
 
 <footer style="text-align: center; margin-top: 2rem; padding: 1rem; color: var(--text-muted); font-size: 0.85rem;">
