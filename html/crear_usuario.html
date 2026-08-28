@@ -86,58 +86,63 @@
   </div>
 
 <script>
-  const API_OBTENER_UNO = 'https://actividades-fmax.vercel.app/api/obtener-usuario';
-  const API_CREAR = 'https://actividades-fmax.vercel.app/api/usuarios';
+  // Endpoints configurados correctamente
+  const API_OBTENER_TODOS = 'https://actividades-fmax.vercel.app/api/obtener-usuarios';
+  const API_CREAR = 'https://actividades-fmax.vercel.app/api/crear-usuario';
   const API_ACTUALIZAR = 'https://actividades-fmax.vercel.app/api/actualizar-usuario';
 
-  // Obtener el ID desde los parámetros de la URL (?edit=123)
+  // Leer ID de la URL (?edit=ID)
   const urlParams = new URLSearchParams(window.location.search);
   const userId = urlParams.get('edit');
 
   document.addEventListener('DOMContentLoaded', () => {
     if (userId) {
-      // Modo Edición: adaptar interfaz y cargar datos
+      // Ajustar la vista a Modo Edición
       const titulo = document.querySelector('h1');
       if (titulo) titulo.textContent = 'Editar Usuario';
-      
-      const btnSubmit = document.getElementById('btn-guardar');
+
+      const btnSubmit = document.getElementById('btn-guardar') || document.querySelector('button[type="submit"]');
       if (btnSubmit) btnSubmit.textContent = 'Guardar Cambios';
 
       cargarDatosUsuario(userId);
     }
   });
 
-async function cargarDatosUsuario(id) {
-  try {
-    const res = await fetch(`${API_OBTENER_UNO}?id=${id}`);
-    
-    // Evita el fallo al parsear JSON si Vercel o el servidor responden con HTML
-    if (!res.ok) {
-      throw new Error(`Servidor devolvió respuesta no válida (${res.status})`);
+  async function cargarDatosUsuario(id) {
+    try {
+      // Petición a la lista general para evitar el error 404
+      const res = await fetch(API_OBTENER_TODOS);
+      if (!res.ok) throw new Error('No se pudo conectar con el servidor.');
+
+      const usuarios = await res.json();
+      const user = usuarios.find(u => String(u.id) === String(id));
+
+      if (!user) {
+        alert('El usuario no existe o fue eliminado');
+        return;
+      }
+
+      // Poblado seguro de inputs
+      if (document.getElementById('nombre')) document.getElementById('nombre').value = user.nombre || '';
+      if (document.getElementById('usuario')) document.getElementById('usuario').value = user.usuario || '';
+      if (document.getElementById('telefono')) document.getElementById('telefono').value = user.telefono || '';
+      if (document.getElementById('direccion')) document.getElementById('direccion').value = user.direccion || '';
+      if (document.getElementById('sector')) document.getElementById('sector').value = user.sector || '';
+
+      if (document.getElementById('valor_act')) document.getElementById('valor_act').value = user.valor_act ?? 7.00;
+      if (document.getElementById('valor_pred')) document.getElementById('valor_pred').value = user.valor_pred ?? 1.00;
+      if (document.getElementById('valor_ac')) document.getElementById('valor_ac').value = user.valor_ac ?? 1.00;
+      if (document.getElementById('valor_exc')) document.getElementById('valor_exc').value = user.valor_exc ?? 0.04;
+      if (document.getElementById('valor_visit')) document.getElementById('valor_visit').value = user.valor_visit ?? 6.00;
+
+    } catch (err) {
+      alert('Error al cargar datos: ' + err.message);
     }
-
-    const data = await res.json();
-
-    if (document.getElementById('nombre')) document.getElementById('nombre').value = data.nombre || '';
-    if (document.getElementById('usuario')) document.getElementById('usuario').value = data.usuario || '';
-    if (document.getElementById('telefono')) document.getElementById('telefono').value = data.telefono || '';
-    if (document.getElementById('direccion')) document.getElementById('direccion').value = data.direccion || '';
-    if (document.getElementById('sector')) document.getElementById('sector').value = data.sector || '';
-
-    if (document.getElementById('valor_act')) document.getElementById('valor_act').value = data.valor_act ?? 7.00;
-    if (document.getElementById('valor_pred')) document.getElementById('valor_pred').value = data.valor_pred ?? 1.00;
-    if (document.getElementById('valor_ac')) document.getElementById('valor_ac').value = data.valor_ac ?? 1.00;
-    if (document.getElementById('valor_exc')) document.getElementById('valor_exc').value = data.valor_exc ?? 0.04;
-    if (document.getElementById('valor_visit')) document.getElementById('valor_visit').value = data.valor_visit ?? 6.00;
-
-  } catch (err) {
-    alert('Error al cargar datos: ' + err.message);
   }
-}
 
-  // Manejador del envío del formulario
-  const formUsuario = document.getElementById('form-usuario'); // Asegúrate de tener este ID en tu <form>
-  
+  // Evento submit con selector alternativo
+  const formUsuario = document.getElementById('form-usuario') || document.querySelector('form');
+
   if (formUsuario) {
     formUsuario.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -155,7 +160,6 @@ async function cargarDatosUsuario(id) {
         valor_visit: document.getElementById('valor_visit')?.value
       };
 
-      // Si estamos editando, agregamos el ID y usamos el endpoint de actualización
       let url = API_CREAR;
       if (userId) {
         payload.id = userId;
@@ -173,7 +177,7 @@ async function cargarDatosUsuario(id) {
         if (!res.ok) throw new Error(result.error || 'Ocurrió un error al procesar');
 
         alert(userId ? 'Usuario actualizado con éxito' : 'Usuario creado con éxito');
-        window.location.href = 'usuarios.html'; // Redirige a la tabla
+        window.location.href = 'usuarios.html';
       } catch (err) {
         alert('Error: ' + err.message);
       }
