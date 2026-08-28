@@ -189,24 +189,26 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function cargarDashboard() {
-  if (!selectPeriodo) return;
-  const [fInicio, fFin] = selectPeriodo.value.split('|');
+  if (!selectPeriodo || !selectPeriodo.value) return;
 
-  // Extraer ID de usuario activo
+  const partes = selectPeriodo.value.split('|');
+  if (partes.length < 2) return;
+  const [fInicio, fFin] = partes;
+
+  // Extraer ID de usuario activo (Priorizando id_usuario)
   const usuarioSesion = localStorage.getItem('usuarioSesion');
   let usuarioId = '';
 
   if (usuarioSesion) {
     try {
       const user = JSON.parse(usuarioSesion);
-      usuarioId = user.id || user.usuario_id || user.id_usuario || '';
+      usuarioId = user.id_usuario || user.id || user.usuario_id || '';
     } catch (e) {
       console.error('Error al leer el ID de usuarioSesion:', e);
     }
   }
 
   try {
-    // Construir parámetros de consulta dinámicos
     const params = new URLSearchParams({
       fecha_inicio: fInicio,
       fecha_fin: fFin
@@ -217,30 +219,41 @@ async function cargarDashboard() {
     }
 
     const res = await fetch(`${API_DASHBOARD}?${params.toString()}`);
+    
+    if (!res.ok) {
+      throw new Error(`Error en el servidor: ${res.status}`);
+    }
+
     const data = await res.json();
 
-    if (res.ok) {
-      renderKPIs(data.summary || {});
-      renderOrigen(data.origen || []);
-      renderTipos(data.tipos || []);
-      renderRecientes(data.recientes || []);
-    }
+    renderKPIs(data.summary || {});
+    renderOrigen(data.origen || []);
+    renderTipos(data.tipos || []);
+    renderRecientes(data.recientes || []);
+
   } catch (err) {
     console.error('Error al cargar datos del dashboard:', err);
+    mostrarErrorUI();
   }
 }
 
-function renderKPIs(s) {
-  document.getElementById('dash-monto').textContent = `$${(parseFloat(s.total_monto) || 0).toFixed(2)}`;
-  document.getElementById('dash-actividades').textContent = s.total_actividades || 0;
-  document.getElementById('dash-registros').textContent = `${s.total_registros || 0} registros guardados`;
-  document.getElementById('dash-excedente-m').textContent = `${s.total_excedente_m || 0} m`;
-  document.getElementById('dash-excedente-val').textContent = `Valor: $${(parseFloat(s.total_excedente_val) || 0).toFixed(2)}`;
-  document.getElementById('dash-adicionales').textContent = `${s.total_puntos_red || 0} / ${s.total_ac || 0}`;
+function renderKPIs(s = {}) {
+  const setTexto = (id, valor) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = valor;
+  };
+
+  setTexto('dash-monto', `$${(parseFloat(s.total_monto) || 0).toFixed(2)}`);
+  setTexto('dash-actividades', s.total_actividades || 0);
+  setTexto('dash-registros', `${s.total_registros || 0} registros guardados`);
+  setTexto('dash-excedente-m', `${s.total_excedente_m || 0} m`);
+  setTexto('dash-excedente-val', `Valor: $${(parseFloat(s.total_excedente_val) || 0).toFixed(2)}`);
+  setTexto('dash-adicionales', `${s.total_puntos_red || 0} / ${s.total_ac || 0}`);
 }
 
 function renderOrigen(origenList) {
   const contenedor = document.getElementById('panel-origen');
+  if (!contenedor) return;
   
   if (!origenList || origenList.length === 0) {
     contenedor.innerHTML = '<div class="stat-row"><span>Sin registros en el período</span></div>';
@@ -260,6 +273,7 @@ function renderOrigen(origenList) {
 
 function renderTipos(tiposList) {
   const contenedor = document.getElementById('panel-tipos');
+  if (!contenedor) return;
   
   if (!tiposList || tiposList.length === 0) {
     contenedor.innerHTML = '<div class="stat-row"><span>Sin registros en el período</span></div>';
@@ -279,6 +293,7 @@ function renderTipos(tiposList) {
 
 function renderRecientes(recientes) {
   const tbody = document.getElementById('tabla-recientes');
+  if (!tbody) return;
   
   if (!recientes || recientes.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Sin actividades recientes</td></tr>';
@@ -293,11 +308,22 @@ function renderRecientes(recientes) {
         <td data-label="Cuadrilla" class="td-cuadrilla">${r.cuadrilla || 'PROPIA'}</td>
         <td data-label="Cliente">${r.cliente || 'NO DEFINIDO'}</td>
         <td data-label="Tipo"><span class="badge ${obtenerClaseBadge(r.tipo_actividad)}">${r.tipo_actividad}</span></td>
-        <td data-label="Forma">${r.forma_actividad}</td>
+        <td data-label="Forma">${r.forma_actividad || '-'}</td>
         <td data-label="Monto" style="font-weight:700; color:#10b981;">$${(parseFloat(r.total_act) || 0).toFixed(2)}</td>
       </tr>
     `;
   }).join('');
+}
+
+function mostrarErrorUI() {
+  renderKPIs({});
+  const panelOrigen = document.getElementById('panel-origen');
+  const panelTipos = document.getElementById('panel-tipos');
+  const tbody = document.getElementById('tabla-recientes');
+
+  if (panelOrigen) panelOrigen.innerHTML = '<div class="stat-row"><span style="color:#ef4444;">Error al obtener datos</span></div>';
+  if (panelTipos) panelTipos.innerHTML = '<div class="stat-row"><span style="color:#ef4444;">Error al obtener datos</span></div>';
+  if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ef4444;">No se pudieron cargar las actividades</td></tr>';
 }
   </script>
 </body>

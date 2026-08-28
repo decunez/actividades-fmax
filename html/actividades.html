@@ -481,6 +481,7 @@ async function cargarActividades() {
             <button class="btn-edit" onclick="editarActividad(${JSON.stringify(item).replace(/"/g, '&quot;')}, '${paginaDestino}')">
               ✏️ Editar
             </button>
+            <button class="btn-eliminar" onclick="eliminarActividad(${r.id})">🗑️ Eliminar</button>
           </td>
         </tr>
       `;
@@ -503,6 +504,32 @@ async function cargarActividades() {
     actividadesCargadas = [];
   }
 }
+
+
+async function eliminarActividad(id) {
+  if (!confirm('¿Estás seguro de que deseas eliminar este registro?')) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://actividades-fmax.vercel.app/api/eliminar?id=${id}`, {
+      method: 'DELETE'
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert('Registro eliminado con éxito.');
+      cargarDashboard(); // o la función que recarga tu tabla
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (err) {
+    console.error('Error al eliminar:', err);
+    alert('Ocurrió un error al intentar eliminar la actividad.');
+  }
+}
+
 
 function resetearKPIs() {
   document.getElementById('kpi-registros').textContent = '0';
