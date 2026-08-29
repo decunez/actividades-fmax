@@ -115,17 +115,27 @@
     const API_OBTENER = 'https://actividades-fmax.vercel.app/api/usuarios';
     const API_ELIMINAR = 'https://actividades-fmax.vercel.app/api/eliminar-usuario';
 
-    document.addEventListener('DOMContentLoaded', cargarUsuarios);
+document.addEventListener('DOMContentLoaded', () => {
+  const badge = document.getElementById('user-badge');
+  const sesion = localStorage.getItem('usuarioSesion');
 
-    async function cargarUsuarios() {
-      try {
-        const res = await fetch(API_OBTENER);
-        const usuarios = await res.json();
-        renderizarTabla(usuarios);
-      } catch (err) {
-        console.error('Error al obtener usuarios:', err);
-      }
+  // Redirigir si no hay sesión activa
+  if (!sesion) {
+    window.location.href = '../index.html';
+    return;
+  }
+
+  if (badge) {
+    try {
+      // Si la sesión se guardó como objeto JSON
+      const user = JSON.parse(sesion);
+      badge.textContent = user.nombre || user.usuario || sesion;
+    } catch (e) {
+      // Si la sesión se guardó como texto plano
+      badge.textContent = sesion;
     }
+  }
+});
 
     function renderizarTabla(listaUsuarios) {
       const tbody = document.getElementById('tabla-usuarios');
