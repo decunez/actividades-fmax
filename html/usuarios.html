@@ -3,8 +3,8 @@
 <head>
   <script>
     const usuarioSesion = localStorage.getItem('usuarioSesion');
-    if (!usuarioSesion) {
-      window.location.href = 'login.html';
+    if (!usuarioSesion || usuarioSesion === 'null' || usuarioSesion === 'undefined') {
+      window.location.href = '../index.html';
     }
   </script>
   <meta charset="UTF-8">
@@ -112,30 +112,61 @@
   <script src="../script.js"></script>
 
   <script>
-    const API_OBTENER = 'https://actividades-fmax.vercel.app/api/usuarios';
+    const API_OBTENER = 'https://actividades-fmax.vercel.app/api/obtener-usuarios';
     const API_ELIMINAR = 'https://actividades-fmax.vercel.app/api/eliminar-usuario';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const badge = document.getElementById('user-badge');
-  const sesion = localStorage.getItem('usuarioSesion');
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Control de Sesión e Inyección del Nombre
+      const badge = document.getElementById('user-badge');
+      const sesion = localStorage.getItem('usuarioSesion');
 
-  // Redirigir si no hay sesión activa
-  if (!sesion) {
-    window.location.href = '../index.html';
-    return;
-  }
+      if (badge && sesion) {
+        try {
+          const user = JSON.parse(sesion);
+          if (user && typeof user === 'object') {
+            badge.textContent = user.nombre || user.usuario || 'Usuario';
+          } else {
+            badge.textContent = sesion;
+          }
+        } catch (e) {
+          badge.textContent = sesion;
+        }
+      }
 
-  if (badge) {
-    try {
-      // Si la sesión se guardó como objeto JSON
-      const user = JSON.parse(sesion);
-      badge.textContent = user.nombre || user.usuario || sesion;
-    } catch (e) {
-      // Si la sesión se guardó como texto plano
-      badge.textContent = sesion;
+      // 2. Control de Apertura del Menú Móvil
+      const menuBtn = document.getElementById('btn-menu');
+      const navContent = document.getElementById('nav-content');
+
+      if (menuBtn && navContent) {
+        menuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navContent.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!navContent.contains(e.target) && !menuBtn.contains(e.target)) {
+            navContent.classList.remove('active');
+          }
+        });
+      }
+
+      // 3. Cargar la lista de usuarios al iniciar
+      cargarUsuarios();
+    });
+
+    async function cargarUsuarios() {
+      const tbody = document.getElementById('tabla-usuarios');
+      try {
+        const res = await fetch(API_OBTENER);
+        if (!res.ok) throw new Error('No se pudo obtener la lista de usuarios.');
+        const data = await res.json();
+        renderizarTabla(data);
+      } catch (err) {
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">Error: ${err.message}</td></tr>`;
+        }
+      }
     }
-  }
-});
 
     function renderizarTabla(listaUsuarios) {
       const tbody = document.getElementById('tabla-usuarios');
@@ -163,13 +194,14 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.appendChild(tr);
       });
 
-      // Asignar eventos a los botones generados
+      // Eventos de botones Editar
       tbody.querySelectorAll('.btn-edit-usr').forEach(btn => {
         btn.addEventListener('click', () => {
           window.location.href = `crear_usuario.html?edit=${btn.dataset.id}`;
         });
       });
 
+      // Eventos de botones Eliminar
       tbody.querySelectorAll('.btn-delete-usr').forEach(btn => {
         btn.addEventListener('click', () => {
           eliminarUsuario(btn.dataset.id, btn.dataset.nombre);
@@ -196,6 +228,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         alert('Error: ' + err.message);
       }
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem('usuarioSesion');
+      window.location.href = '../index.html';
     }
   </script>
 </body>
