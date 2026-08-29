@@ -42,6 +42,37 @@
     .btn-delete-usr:hover {
       background-color: #b91c1c !important;
     }
+
+    /* Reglas CSS para despliegue del menú en pantallas pequeñas */
+    @media (max-width: 768px) {
+      .hamburger-btn {
+        display: block !important;
+        font-size: 24px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 4px 8px;
+      }
+      .nav-content {
+        display: none; /* Se oculta en móvil por defecto */
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background-color: #ffffff;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+      }
+      .nav-content.active {
+        display: flex !important; /* Fuerza visibilidad al presionar el botón */
+      }
+      .nav-links {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -109,131 +140,130 @@
     <p>&copy; 2026 Daniel Cuñez - Todos los derechos reservados</p>
   </footer>
 
-  <script src="../script.js"></script>
+<script>
+  const API_OBTENER = 'https://actividades-fmax.vercel.app/api/usuarios';
+  const API_ELIMINAR = 'https://actividades-fmax.vercel.app/api/eliminar-usuario';
 
-  <script>
-    const API_OBTENER = 'https://actividades-fmax.vercel.app/api/obtener-usuarios';
-    const API_ELIMINAR = 'https://actividades-fmax.vercel.app/api/eliminar-usuario';
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Control de Sesión e Inyección del Nombre
+    const badge = document.getElementById('user-badge');
+    const sesion = localStorage.getItem('usuarioSesion');
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // 1. Control de Sesión e Inyección del Nombre
-      const badge = document.getElementById('user-badge');
-      const sesion = localStorage.getItem('usuarioSesion');
-
-      if (badge && sesion) {
-        try {
-          const user = JSON.parse(sesion);
-          if (user && typeof user === 'object') {
-            badge.textContent = user.nombre || user.usuario || 'Usuario';
-          } else {
-            badge.textContent = sesion;
-          }
-        } catch (e) {
+    if (badge && sesion) {
+      try {
+        const user = JSON.parse(sesion);
+        if (user && typeof user === 'object') {
+          badge.textContent = user.nombre || user.usuario || 'Usuario';
+        } else {
           badge.textContent = sesion;
         }
+      } catch (e) {
+        badge.textContent = sesion;
       }
+    }
 
-      // 2. Control de Apertura del Menú Móvil
-      const menuBtn = document.getElementById('btn-menu');
-      const navContent = document.getElementById('nav-content');
+    // 2. Control de Apertura del Menú Móvil
+    const menuBtn = document.getElementById('btn-menu');
+    const navContent = document.getElementById('nav-content');
 
-      if (menuBtn && navContent) {
-        menuBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          navContent.classList.toggle('active');
-        });
+    if (menuBtn && navContent) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navContent.classList.toggle('active');
+      });
 
-        document.addEventListener('click', (e) => {
-          if (!navContent.contains(e.target) && !menuBtn.contains(e.target)) {
-            navContent.classList.remove('active');
-          }
-        });
+      document.addEventListener('click', (e) => {
+        if (!navContent.contains(e.target) && !menuBtn.contains(e.target)) {
+          navContent.classList.remove('active');
+        }
+      });
+    }
+
+    // 3. Cargar la lista de usuarios
+    cargarUsuarios();
+  });
+
+  async function cargarUsuarios() {
+    const tbody = document.getElementById('tabla-usuarios');
+    try {
+      const res = await fetch(API_OBTENER);
+      if (!res.ok) throw new Error(`Error en el servidor (${res.status})`);
+      const json = await res.json();
+      
+      // Normaliza los datos si la API devuelve un Array directo o un objeto { usuarios: [...] }
+      const listaUsuarios = Array.isArray(json) ? json : (json.usuarios || json.data || []);
+      renderizarTabla(listaUsuarios);
+    } catch (err) {
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">Error al cargar datos: ${err.message}</td></tr>`;
       }
+    }
+  }
 
-      // 3. Cargar la lista de usuarios al iniciar
-      cargarUsuarios();
+  function renderizarTabla(listaUsuarios) {
+    const tbody = document.getElementById('tabla-usuarios');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (!Array.isArray(listaUsuarios) || listaUsuarios.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay usuarios registrados.</td></tr>';
+      return;
+    }
+
+    listaUsuarios.forEach(user => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${user.id}</td>
+        <td><strong>${user.nombre || ''}</strong></td>
+        <td>${user.telefono || '-'}</td>
+        <td>${user.direccion || '-'}</td>
+        <td><strong>${user.sector || '-'}</strong></td>
+        <td style="text-align: center; white-space: nowrap;">
+          <button class="btn-edit-usr" data-id="${user.id}">Editar</button>
+          <button class="btn-delete-usr" data-id="${user.id}" data-nombre="${user.nombre || ''}">Eliminar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    async function cargarUsuarios() {
-      const tbody = document.getElementById('tabla-usuarios');
-      try {
-        const res = await fetch(API_OBTENER);
-        if (!res.ok) throw new Error('No se pudo obtener la lista de usuarios.');
-        const data = await res.json();
-        renderizarTabla(data);
-      } catch (err) {
-        if (tbody) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: red;">Error: ${err.message}</td></tr>`;
-        }
-      }
-    }
+    tbody.querySelectorAll('.btn-edit-usr').forEach(btn => {
+      btn.addEventListener('click', () => {
+        window.location.href = `crear_usuario.html?edit=${btn.dataset.id}`;
+      });
+    });
 
-    function renderizarTabla(listaUsuarios) {
-      const tbody = document.getElementById('tabla-usuarios');
-      if (!tbody) return;
-      tbody.innerHTML = '';
+    tbody.querySelectorAll('.btn-delete-usr').forEach(btn => {
+      btn.addEventListener('click', () => {
+        eliminarUsuario(btn.dataset.id, btn.dataset.nombre);
+      });
+    });
+  }
 
-      if (!Array.isArray(listaUsuarios) || listaUsuarios.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay usuarios registrados.</td></tr>';
-        return;
-      }
+  async function eliminarUsuario(id, nombre) {
+    if (!confirm(`¿Estás seguro de eliminar a "${nombre}"?`)) return;
 
-      listaUsuarios.forEach(user => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${user.id}</td>
-          <td><strong>${user.nombre || ''}</strong></td>
-          <td>${user.telefono || '-'}</td>
-          <td>${user.direccion || '-'}</td>
-          <td><strong>${user.sector || '-'}</strong></td>
-          <td style="text-align: center; white-space: nowrap;">
-            <button class="btn-edit-usr" data-id="${user.id}">Editar</button>
-            <button class="btn-delete-usr" data-id="${user.id}" data-nombre="${user.nombre || ''}">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+    try {
+      const res = await fetch(API_ELIMINAR, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
       });
 
-      // Eventos de botones Editar
-      tbody.querySelectorAll('.btn-edit-usr').forEach(btn => {
-        btn.addEventListener('click', () => {
-          window.location.href = `crear_usuario.html?edit=${btn.dataset.id}`;
-        });
-      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo eliminar');
 
-      // Eventos de botones Eliminar
-      tbody.querySelectorAll('.btn-delete-usr').forEach(btn => {
-        btn.addEventListener('click', () => {
-          eliminarUsuario(btn.dataset.id, btn.dataset.nombre);
-        });
-      });
+      alert('Usuario eliminado correctamente');
+      cargarUsuarios();
+
+    } catch (err) {
+      alert('Error: ' + err.message);
     }
+  }
 
-    async function eliminarUsuario(id, nombre) {
-      if (!confirm(`¿Estás seguro de eliminar a "${nombre}"?`)) return;
-
-      try {
-        const res = await fetch(API_ELIMINAR, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'No se pudo eliminar');
-
-        alert('Usuario eliminado correctamente');
-        cargarUsuarios();
-
-      } catch (err) {
-        alert('Error: ' + err.message);
-      }
-    }
-
-    function cerrarSesion() {
-      localStorage.removeItem('usuarioSesion');
-      window.location.href = '../index.html';
-    }
-  </script>
+  function cerrarSesion() {
+    localStorage.removeItem('usuarioSesion');
+    window.location.href = '../index.html';
+  }
+</script>
 </body>
 </html>
