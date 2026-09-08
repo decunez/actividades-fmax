@@ -268,18 +268,33 @@ function cargarDatosEdicion() {
 
 async function cargarUsuariosSelect() {
   const select = document.getElementById('id_usuario');
+  let idUsuarioLogueado = null;
+
+  // 1. Obtener ID del usuario activo en sesión
+  const sesionRaw = localStorage.getItem('usuarioSesion');
+  if (sesionRaw) {
+    try {
+      const userLogueado = JSON.parse(sesionRaw);
+      idUsuarioLogueado = userLogueado.id || userLogueado.id_usuario;
+    } catch (e) {
+      console.error('Error al leer el usuario de localStorage:', e);
+    }
+  }
+
   try {
     const res = await fetch('https://actividades-fmax.vercel.app/api/usuarios');
-    usuariosCache = await res.json();
+    const json = await res.json();
+    usuariosCache = Array.isArray(json) ? json : (json.usuarios || json.data || []);
+    
     select.innerHTML = '<option value="">Seleccione un usuario...</option>';
     
     usuariosCache.forEach(u => {
-      const selectedAttr = u.id == 1 ? 'selected' : '';
-      select.innerHTML += `<option value="${u.id}" ${selectedAttr}>${u.nombre} (${u.sector || 'S/N'})</option>`;
+      select.innerHTML += `<option value="${u.id}">${u.nombre} (${u.sector || 'S/N'})</option>`;
     });
 
-    if (usuariosCache.some(u => u.id == 1)) {
-      select.value = '1';
+    // 2. Preseleccionar automáticamente el usuario logueado
+    if (idUsuarioLogueado && usuariosCache.some(u => u.id == idUsuarioLogueado)) {
+      select.value = idUsuarioLogueado;
     }
   } catch (err) {
     select.innerHTML = '<option value="">Error al cargar usuarios</option>';
