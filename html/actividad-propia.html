@@ -317,8 +317,7 @@ function actualizarFormaActividad() {
     selectForma.innerHTML = `
       <option value="NORMAL">CAMBIO CONECTOR</option>
       <option value="RECABLEADO-NORMAL">RECABLEADO-NORMAL</option>
-      <option value="RECABLEADO-DUCTERIA">RECABLEADO-DUCTERIA</option>
-      <option value="RECABLEADO-SOTERRADO">RECABLEADO-SOTERRADO</option>
+      <option value="DUCTERIA/SOTERRADO">RECABLEADO-DOBLE</option>
     `;
   } else {
     selectForma.innerHTML = '<option value="">Seleccione tipo primero...</option>';
@@ -375,7 +374,7 @@ function calcularValores() {
   } else if (tipo === 'VISITA') {
     if (forma === 'NORMAL') valor_actividad = tarifas.valor_visit;
     else if (forma === 'RECABLEADO-NORMAL') valor_actividad = tarifas.valor_act;
-    else if (forma === 'RECABLEADO-DUCTERIA' || forma === 'RECABLEADO-SOTERRADO') valor_actividad = tarifas.valor_act * 2;
+    else if (forma === 'DUCTERIA/SOTERRADO') valor_actividad = tarifas.valor_act * 2;
   }
 
   // 3. punto_red y valor_pred (Usa valor_pred de la BD)
