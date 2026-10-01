@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await cargarUsuariosSelect();
 
   // 2. Establecer la fecha de hoy por defecto
-  document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+document.getElementById('fecha').value = new Date().toLocaleDateString('en-CA');
 
   // 3. Registrar Event Listeners
   document.getElementById('tipo_actividad').addEventListener('change', () => {
